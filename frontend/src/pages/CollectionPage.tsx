@@ -34,49 +34,49 @@ const CollectionPage = () => {
 		setTimeout(() => {
 			const fetchedProducts: Product[] = [
 				{
-					_id: 5,
+					_id: "5",
 					name: "Product 1",
 					price: 21000,
 					images: [{ url: "https://picsum.photos/500/500?random=12" }],
 				},
 				{
-					_id: 6,
+					_id: "6",
 					name: "Product 2",
 					price: 22000,
 					images: [{ url: "https://picsum.photos/500/500?random=13" }],
 				},
 				{
-					_id: 7,
+					_id: "7",
 					name: "Product 3",
 					price: 24000,
 					images: [{ url: "https://picsum.photos/500/500?random=14" }],
 				},
 				{
-					_id: 8,
+					_id: "8",
 					name: "Product 4",
 					price: 29000,
 					images: [{ url: "https://picsum.photos/500/500?random=15" }],
 				},
 				{
-					_id: 9,
+					_id: "9",
 					name: "Product 5",
 					price: 49000,
 					images: [{ url: "https://picsum.photos/500/500?random=16" }],
 				},
 				{
-					_id: 10,
+					_id: "10",
 					name: "Product 6",
 					price: 229000,
 					images: [{ url: "https://picsum.photos/500/500?random=17" }],
 				},
 				{
-					_id: 11,
+					_id: "11",
 					name: "Product 7",
 					price: 291000,
 					images: [{ url: "https://picsum.photos/500/500?random=18" }],
 				},
 				{
-					_id: 12,
+					_id: "12",
 					name: "Product 8",
 					price: 329000,
 					images: [{ url: "https://picsum.photos/500/500?random=19" }],

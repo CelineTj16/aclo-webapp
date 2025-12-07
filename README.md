@@ -37,6 +37,9 @@ Packages needed for BACKEND:
 
 To run FE, cd into the frontend folder and run `npm run dev`
 To run BE, cd into the backend folder and run `npm run dev`
-BACKEND STRUCTURE:
 
-- models - store all our schemas
+BACKEND note:
+We are allowing users to create a cart even if they're not logged in (i.e. guest users). But guest users aren't allowed to checkout.
+If they login, it will be converted into a User Cart, hence the merge cart functionality in the api
+
+CartItemSchema: productId, name, image, price, category, options, quantity
