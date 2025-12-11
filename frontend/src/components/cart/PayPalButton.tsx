@@ -1,3 +1,4 @@
+// @ts-nocheck
 // IGNORE ERRORS/WARNINGS IN THIS FILE BECAUSE WE WON'T BE USING PAYPAL
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 
