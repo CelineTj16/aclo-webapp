@@ -1,34 +1,51 @@
 import { RiDeleteBinLine } from "react-icons/ri";
-import type { CartItem } from "../../types/cart";
+import { useAppDispatch } from "../../redux/hooks";
+import {
+	removeFromCart,
+	updateCartItemQuantity,
+} from "../../redux/slices/cartSlice";
+import type { Cart } from "../../types/cart";
 
-const CartContents = () => {
-	const cartProducts: CartItem[] = [
-		{
-			productId: "1",
-			name: "T-shirt",
-			options: {
-				size: "M",
-				color: "Red",
-			},
-			quantity: 1,
-			price: 15000,
-			image: "https://picsum.photos/200?random=1",
-		},
-		{
-			productId: "2",
-			name: "Jeans",
-			options: {
-				size: "L",
-				color: "Blue",
-			},
-			quantity: 1,
-			price: 15000,
-			image: "https://picsum.photos/200?random=2",
-		},
-	];
+type CartContentsProps = {
+	cart: Cart;
+	userId?: string;
+	guestId?: string;
+};
+
+const CartContents = ({ cart, userId, guestId }: CartContentsProps) => {
+	const dispatch = useAppDispatch();
+
+	// handle adding/subtracting to cart
+	const handleAddToCart = (
+		productId: string,
+		delta: number,
+		quantity: number,
+		options?: Record<string, any>
+	) => {
+		const newQuantity = quantity + delta;
+		if (newQuantity >= 1) {
+			dispatch(
+				updateCartItemQuantity({
+					productId,
+					quantity: newQuantity,
+					options,
+					guestId,
+					userId,
+				})
+			);
+		}
+	};
+
+	const handleRemoveFromCart = (
+		productId: string,
+		options?: Record<string, any>
+	) => {
+		dispatch(removeFromCart({ productId, options, guestId, userId }));
+	};
+
 	return (
 		<div>
-			{cartProducts.map((product, index) => (
+			{cart.products.map((product, index) => (
 				<div
 					key={index}
 					className="flex items-start justify-between py-4 border-b"
@@ -41,17 +58,47 @@ const CartContents = () => {
 						/>
 						<div>
 							<h3>{product.name}</h3>
-							<p className="text-sm text-gray-500">
-								size: {product.options?.size} | color: {product.options?.color}{" "}
-							</p>
+							{product.options && Object.keys(product.options).length > 0 && (
+								<p className="text-sm text-gray-500">
+									{Object.entries(product.options)
+										.map(([key, value]) => {
+											const displayValue = String(value);
+											// capitalise the first letter of key
+											const label = key.charAt(0).toUpperCase() + key.slice(1);
+											return `${label}: ${displayValue}`;
+										})
+										.join(" | ")}
+								</p>
+							)}
+
 							<div className="flex items-center mt-2">
-								<button className="border rounded px-2 py-0.5 text-xl font-medium">
+								<button
+									onClick={() =>
+										handleAddToCart(
+											product.productId,
+											-1,
+											product.quantity,
+											product.options
+										)
+									}
+									className="border rounded px-2 py-0.5 text-xl font-medium"
+								>
 									-
 								</button>
 								<span className="border rounded px-4 py-1">
 									{product.quantity}
 								</span>
-								<button className="border rounded px-1.75 py-0.5 text-xl font-medium">
+								<button
+									onClick={() =>
+										handleAddToCart(
+											product.productId,
+											1,
+											product.quantity,
+											product.options
+										)
+									}
+									className="border rounded px-1.75 py-0.5 text-xl font-medium"
+								>
 									+
 								</button>
 							</div>
@@ -59,7 +106,11 @@ const CartContents = () => {
 					</div>
 					<div>
 						<p>IDR {product.price.toLocaleString()}</p>
-						<button>
+						<button
+							onClick={() =>
+								handleRemoveFromCart(product.productId, product.options)
+							}
+						>
 							<RiDeleteBinLine className="h-6 w-6 mt-2 text-red-600" />
 						</button>
 					</div>

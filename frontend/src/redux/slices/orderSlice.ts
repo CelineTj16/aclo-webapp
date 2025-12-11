@@ -44,7 +44,7 @@ export const fetchOrderDetails = createAsyncThunk<
 	Order,
 	{ orderId: string },
 	{ rejectValue: AppError }
->("orders/fetchOrderDetails", async (orderId, { rejectWithValue }) => {
+>("orders/fetchOrderDetails", async ({ orderId }, { rejectWithValue }) => {
 	try {
 		const response = await axios.get(`${API_URL}/api/orders/${orderId}`, {
 			headers: getAuthHeader(),

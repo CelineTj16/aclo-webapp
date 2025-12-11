@@ -31,6 +31,7 @@ const orderItemSchema = new mongoose.Schema(
 	{ _id: false }
 );
 
+// NEED TO ADD SHIPPING METHOD
 const orderSchema = new mongoose.Schema(
 	{
 		user: {

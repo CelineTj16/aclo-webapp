@@ -1,42 +1,20 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import PayPalButton from "./PayPalButton";
-import type { Cart } from "../../types/cart";
-
-// mock cart
-const cart: Cart = {
-	products: [
-		{
-			productId: "1",
-			name: "T-shirt",
-			options: {
-				size: "M",
-				color: "Red",
-			},
-			quantity: 1,
-			price: 15000,
-			image: "https://picsum.photos/200?random=1",
-		},
-		{
-			productId: "2",
-			name: "Jeans",
-			options: {
-
-				size: "L",
-				color: "Blue",
-			},
-			quantity: 1,
-			price: 15000,
-			image: "https://picsum.photos/200?random=2",
-		},
-	],
-	totalPrice: 30000,
-};
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { createCheckout } from "../../redux/slices/checkoutSlice";
+import { API_URL, getAuthHeader } from "../../constants/api";
+import axios from "axios";
+import type { Checkout, ShippingDetails } from "../../types/checkout";
 
 const Checkout = () => {
 	const navigate = useNavigate();
+	const dispatch = useAppDispatch();
+	const { cart, loading, error } = useAppSelector((state) => state.cart);
+	const { user } = useAppSelector((state) => state.auth);
+
 	const [checkoutId, setCheckoutId] = useState<string | null>(null);
-	const [shippingDetails, setShippingDetails] = useState({
+	const [shippingDetails, setShippingDetails] = useState<ShippingDetails>({
 		name: "",
 		address: "",
 		city: "",
@@ -44,15 +22,79 @@ const Checkout = () => {
 		phone: "",
 	});
 
-	const handleCreateCheckout = (e: FormEvent<HTMLFormElement>) => {
+	// Ensure cart is loaded before proceeding
+	useEffect(() => {
+		if (!cart || !cart.products || cart.products.length === 0) {
+			navigate("/");
+		}
+	}, [cart, navigate]);
+
+	const handleCreateCheckout = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+		if (!cart || !cart.products || cart.products.length === 0) {
+			return;
+		}
+		try {
+			const createdCheckout: Checkout = await dispatch(
+				createCheckout({
+					checkoutItems: cart.products,
+					shippingDetails,
+					paymentMethod: "Paypal",
+					totalPrice: cart.totalPrice,
+				})
+			).unwrap();
+
+			if (createdCheckout._id) {
+				setCheckoutId(createdCheckout._id);
+			}
+		} catch (error) {
+			console.error("Failed to create checkout: ", error);
+		}
+
 		// paypal developer's account needed for this at https://developer.paypal.com/home/
-		setCheckoutId("dummy-checkout-id");
+		// setCheckoutId("dummy-checkout-id");
 	};
-	const handlePaymentSuccess = (details: Record<string, unknown>) => {
-		console.log("Payment Successful", details);
-		navigate("/order-confirmation");
+	const handlePaymentSuccess = async (details: Record<string, unknown>) => {
+		if (!checkoutId) {
+			console.error("No checkoutId available for payment update.");
+			return;
+		}
+		try {
+			await axios.put(
+				`${API_URL}/api/checkout/${checkoutId}/pay`,
+				{
+					paymentStatus: "paid",
+					paymentDetails: details,
+				},
+				{
+					headers: getAuthHeader(),
+				}
+			);
+			await handleFinalizeCheckout(checkoutId); // finalize checkout if payment is successful
+		} catch (error) {
+			console.error(error);
+		}
 	};
+
+	const handleFinalizeCheckout = async (checkoutId: string) => {
+		try {
+			await axios.post(
+				`${API_URL}/api/checkout/${checkoutId}/finalize`,
+				{},
+				{ headers: getAuthHeader() }
+			);
+			navigate("/order-confirmation");
+		} catch (error) {
+			console.error("Error in handleFinalizeCheckout:", error);
+		}
+	};
+
+	if (loading) return <p>Loading cart...</p>;
+	if (error) return <p>Error: {error}</p>;
+	if (!cart || !cart.products || cart.products.length === 0) {
+		return <p>Your cart is empty</p>;
+	}
+
 	return (
 		<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto py-10 px-6 tracking-tighter">
 			{/* Left Section */}
@@ -64,7 +106,7 @@ const Checkout = () => {
 						<label className="block text-gray-700">Email</label>
 						<input
 							type="email"
-							value="user@example.com"
+							value={user ? user.email : ""}
 							className="w-full p-2 border rounded"
 							disabled
 						/>
@@ -160,7 +202,7 @@ const Checkout = () => {
 								<h3 className="text-lg mb-4">Pay with Paypal</h3>
 								{/* Paypal button component */}
 								<PayPalButton
-									amount={30000}
+									amount={cart.totalPrice}
 									onSuccess={handlePaymentSuccess}
 									onError={(err) => {
 										alert("Payment failed. Try again later.");
@@ -189,8 +231,19 @@ const Checkout = () => {
 								/>
 								<div>
 									<h3 className="text-md">{product.name}</h3>
-									<p className="text-gray-500">Size: {product.options?.size}</p>
-									<p className="text-gray-500">Color: {product.options?.color}</p>
+									{product.options &&
+										Object.keys(product.options).length > 0 && (
+											<p className="text-gray-500 text-sm">
+												{Object.entries(product.options)
+													.map(([key, value]) => {
+														const displayValue = String(value);
+														const label =
+															key.charAt(0).toUpperCase() + key.slice(1);
+														return `${label}: ${displayValue}`;
+													})
+													.join(" | ")}
+											</p>
+										)}
 								</div>
 							</div>
 							<p className="text-xl">IDR {product.price?.toLocaleString()}</p>

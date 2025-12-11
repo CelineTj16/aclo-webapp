@@ -1,9 +1,10 @@
-import { useState, type ChangeEvent, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import registerImg from "../assets/register1.jpg";
 import { registerUser } from "../redux/slices/authSlice";
-import { useAppDispatch } from "../redux/hooks";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import type { RegisterPayload } from "../types/auth";
+import { mergeCart } from "../redux/slices/cartSlice";
 
 const Register = () => {
 	const [formData, setFormData] = useState<RegisterPayload>({
@@ -12,14 +13,35 @@ const Register = () => {
 		password: "",
 	});
 
+	const dispatch = useAppDispatch();
+	const navigate = useNavigate();
+	const location = useLocation();
+	const { user, guestId } = useAppSelector((state) => state.auth);
+	const { cart } = useAppSelector((state) => state.cart);
+
+	// get redirect parameter and check if it's checkout or something else
+	const redirect = new URLSearchParams(location.search).get("redirect") || "/";
+	const isCheckoutRedirect = redirect.includes("checkout");
+
+	useEffect(() => {
+		if (user) {
+			if (cart?.products.length > 0 && guestId) {
+				// merge guest products with user products
+				dispatch(mergeCart({ guestId, user })).then(() => {
+					navigate(isCheckoutRedirect ? "/checkout" : "/");
+				});
+			} else {
+				navigate(isCheckoutRedirect ? "/checkout" : "/");
+			}
+		}
+	}, [user, guestId, cart, navigate, isCheckoutRedirect, dispatch]);
+
 	const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
 		setFormData({
 			...formData,
 			[e.target.name]: e.target.value,
 		});
 	};
-
-	const dispatch = useAppDispatch();
 
 	const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
@@ -83,7 +105,10 @@ const Register = () => {
 					</button>
 					<p className="mt-6 text-center text-sm">
 						Already have an account?{" "}
-						<Link to="/login" className="text-blue-500">
+						<Link
+							to={`/login?redirect=${encodeURIComponent(redirect)}`}
+							className="text-blue-500"
+						>
 							Login
 						</Link>
 					</p>

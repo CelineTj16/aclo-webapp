@@ -1,35 +1,24 @@
-const checkout = {
-	_id: "12323",
-	createdAt: new Date(),
-	checkoutItems: [
-		{
-			productId: "1",
-			name: "Jacket",
-			color: "black",
-			size: "M",
-			price: 15000,
-			quantity: 1,
-			image: "https://picsum.photos/150?random=1",
-		},
-		{
-			productId: "2",
-			name: "T-shirt",
-			color: "black",
-			size: "M",
-			price: 12000,
-			quantity: 2,
-			image: "https://picsum.photos/150?random=2",
-		},
-	],
-	shippingAddress: {
-		address: "123 Address Street",
-		city: "Singapore",
-		postalCode: 123456,
-	},
-};
+import { useNavigate } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { useEffect } from "react";
+import { clearCart } from "../redux/slices/cartSlice";
 
 const OrderConfirmationPage = () => {
-	const calculateEstimatedDelivery = (createdAt: Date) => {
+	const dispatch = useAppDispatch();
+	const navigate = useNavigate();
+	const { checkout } = useAppSelector((state) => state.checkout);
+
+	// clear the cart when order is confirmed
+	useEffect(() => {
+		if (checkout && checkout._id) {
+			dispatch(clearCart());
+		} else {
+			// no checkout in state, redirect user
+			navigate("/my-orders");
+		}
+	}, [checkout, dispatch, navigate]);
+
+	const calculateEstimatedDelivery = (createdAt: string) => {
 		const orderDate = new Date(createdAt);
 		orderDate.setDate(orderDate.getDate() + 10);
 		return orderDate.toLocaleDateString();
@@ -70,9 +59,18 @@ const OrderConfirmationPage = () => {
 								/>
 								<div>
 									<h4 className="text-md font-semibold">{item.name}</h4>
-									<p className="text-sm text-gray-500">
-										{item.color} | {item.size}
-									</p>
+									{item.options && Object.keys(item.options).length > 0 && (
+										<p className="text-sm text-gray-500">
+											{Object.entries(item.options)
+												.map(([key, value]) => {
+													const label =
+														key.charAt(0).toUpperCase() + key.slice(1);
+													const displayValue = String(value);
+													return `${label}: ${displayValue}`;
+												})
+												.join(" | ")}
+										</p>
+									)}
 								</div>
 								<div className="ml-auto text-right">
 									<p className="text-md">IDR {item.price.toLocaleString()}</p>
@@ -90,11 +88,11 @@ const OrderConfirmationPage = () => {
 						<div>
 							<h4 className="text-lg font-semibold mb-2">Delivery</h4>
 							<p className="text-gray-600">
-								{checkout.shippingAddress.address}
+								{checkout.shippingDetails.address}
 							</p>
 							<p className="text-gray-600">
-								{checkout.shippingAddress.city},{" "}
-								{checkout.shippingAddress.postalCode}
+								{checkout.shippingDetails.city},{" "}
+								{checkout.shippingDetails.postalCode}
 							</p>
 						</div>
 					</div>

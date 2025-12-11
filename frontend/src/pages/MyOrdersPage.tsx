@@ -1,76 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-type OrderItem = {
-	name: string;
-	image: string;
-};
-
-type ShippingAddress = {
-	city: string;
-	address: string;
-	postalCode: string;
-};
-
-type Order = {
-	_id: string;
-	createdAt: Date;
-	shippingAddress: ShippingAddress;
-	orderItems: OrderItem[];
-	totalPrice: number;
-	isPaid: boolean;
-};
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { fetchUserOrders } from "../redux/slices/orderSlice";
 
 const MyOrdersPage = () => {
 	const navigate = useNavigate();
-	const [orders, setOrders] = useState<Order[]>([]);
+	const dispatch = useAppDispatch();
+	const { orders, loading, error } = useAppSelector((state) => state.orders);
 
 	useEffect(() => {
-		// simulate fetching orders
-		setTimeout(() => {
-			const mockOrders = [
-				{
-					_id: "12345",
-					createdAt: new Date(),
-					shippingAddress: {
-						city: "Jakarta",
-						address: "Jalan Permata Indah 2 Blok H5/23",
-						postalCode: "12345",
-					},
-					orderItems: [
-						{
-							name: "Product 1",
-							image: "https://picsum.photos/500/500?random=21",
-						},
-					],
-					totalPrice: 243000,
-					isPaid: true,
-				},
-				{
-					_id: "34567",
-					createdAt: new Date(),
-					shippingAddress: {
-						city: "Medan",
-						address: "Jalan Permata Jelek 4 Blok H3/12",
-						postalCode: "67890",
-					},
-					orderItems: [
-						{
-							name: "Product 2",
-							image: "https://picsum.photos/500/500?random=22",
-						},
-					],
-					totalPrice: 32000,
-					isPaid: true,
-				},
-			];
-			setOrders(mockOrders);
-		}, 1000);
-	}, []);
+		dispatch(fetchUserOrders());
+	}, [dispatch]);
 
 	const handleRowClick = (orderId: string) => {
 		navigate(`/order/${orderId}`);
 	};
+	if (loading) return <p>Loading...</p>;
+	if (error) return <p>Error: {error}</p>;
 
 	return (
 		<div className="max-w-7xl mx-auto p-4 sm:p-6">
@@ -111,15 +57,15 @@ const MyOrdersPage = () => {
 										{new Date(order.createdAt).toLocaleTimeString()}
 									</td>
 									<td className="py-2 px-2 sm:py-4 sm:px-4">
-										{order.shippingAddress
-											? `${order.shippingAddress.city}, ${order.shippingAddress.address}, ${order.shippingAddress.postalCode}`
+										{order.shippingDetails
+											? `${order.shippingDetails.address}, ${order.shippingDetails.city}, ${order.shippingDetails.postalCode}`
 											: "N/A"}
 									</td>
 									<td className="py-2 px-2 sm:py-4 sm:px-4">
 										{order.orderItems.length}
 									</td>
 									<td className="py-2 px-2 sm:py-4 sm:px-4">
-										IDR {order.totalPrice}
+										IDR {order.totalPrice.toLocaleString()}
 									</td>
 									<td className="py-2 px-2 sm:py-4 sm:px-4">
 										<span

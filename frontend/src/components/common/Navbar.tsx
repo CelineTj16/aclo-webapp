@@ -9,10 +9,17 @@ import Cartdrawer from "../layout/CartDrawer";
 import { useState } from "react";
 import { IoMdClose } from "react-icons/io";
 import { CATEGORIES } from "../../constants/categories";
+import { useAppSelector } from "../../redux/hooks";
 
 const Navbar = () => {
 	const [drawerOpen, setDrawerOpen] = useState<boolean>(false);
 	const [navDrawerOpen, setNavDrawerOpen] = useState<boolean>(false);
+	const { cart } = useAppSelector((state) => state.cart);
+	const { user } = useAppSelector((state) => state.auth);
+
+	const cartItemCount =
+		cart?.products?.reduce((total, product) => total + product.quantity, 0) ||
+		0;
 
 	const toggleCartDrawer = () => {
 		setDrawerOpen(!drawerOpen);
@@ -54,12 +61,15 @@ const Navbar = () => {
 				</div>
 				{/* Right - Icons */}
 				<div className="flex items-center space-x-4">
-					<Link
-						to="/admin"
-						className="block bg-black px-2 py-1 rounded text-sm text-white"
-					>
-						Admin
-					</Link>
+					{user && user.role === "admin" && (
+						<Link
+							to="/admin"
+							className="block bg-black px-2 py-1 rounded text-sm text-white"
+						>
+							Admin
+						</Link>
+					)}
+
 					<Link
 						to="/profile"
 						className="hover:text-gray-600 hover:cursor-pointer"
@@ -71,9 +81,11 @@ const Navbar = () => {
 						className="relative hover:text-gray-600 hover:cursor-pointer"
 					>
 						<HiOutlineShoppingBag className="h-6 w-6" />
-						<span className="absolute -top-1 bg-red-600 text-white text-xs rounded-full px-1 py-0.5">
-							4
-						</span>
+						{cartItemCount > 0 && (
+							<span className="absolute -top-1 bg-red-600 text-white text-xs rounded-full px-1 py-0.5">
+								{cartItemCount}
+							</span>
+						)}
 					</button>
 					{/* Search */}
 					<Searchbar />

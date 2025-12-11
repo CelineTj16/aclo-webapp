@@ -7,6 +7,8 @@ import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import CollectionPage from "./pages/CollectionPage";
 import ProductDetails from "./components/products/ProductDetails";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 import Checkout from "./components/cart/Checkout";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
 import OrderDetailsPage from "./pages/OrderDetailsPage";
@@ -20,6 +22,7 @@ import OrderManagement from "./components/admin/OrderManagement";
 
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
+import ProtectedRoute from "./components/common/ProtectedRoute";
 
 function App() {
 	return (
@@ -47,7 +50,14 @@ function App() {
 						<Route path="order/:id" element={<OrderDetailsPage />} />
 						<Route path="my-orders" element={<MyOrdersPage />} />
 					</Route>
-					<Route path="/admin" element={<AdminLayout />}>
+					<Route
+						path="/admin"
+						element={
+							<ProtectedRoute role="admin">
+								<AdminLayout />
+							</ProtectedRoute>
+						}
+					>
 						{/* Admin Layout */}
 						<Route index element={<AdminHomePage />} />
 						<Route path="users" element={<UserManagement />} />

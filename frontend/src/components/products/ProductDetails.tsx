@@ -22,11 +22,13 @@ const ProductDetails = ({ productId }: ProductDetailsProps) => {
 	);
 	const { user, guestId } = useAppSelector((state) => state.auth);
 	const [mainImage, setMainImage] = useState<string>("");
-	const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+	const [selectedOptions, setSelectedOptions] = useState<
+		Record<string, string>
+	>({});
 	const [quantity, setQuantity] = useState<number>(1);
 	const [isButtonDisabled, setIsButtonDisabled] = useState<boolean>(false); // for disabling add to cart button during processing
 
-	const productFetchId = productId || id; // use productId for the best seller product, and id for other cases 
+	const productFetchId = productId || id; // use productId for the best seller product, and id for other cases
 
 	// when product changes, change main image
 	useEffect(() => {
@@ -63,20 +65,22 @@ const ProductDetails = ({ productId }: ProductDetailsProps) => {
 			...prev,
 			[key]: value,
 		}));
-	}
+	};
 
 	const handleAddToCart = () => {
 		if (!productFetchId) {
-    toast.error("Invalid product ID.");
-    return;
-  }
-  
+			toast.error("Invalid product ID.");
+			return;
+		}
+
 		if (selectedProduct?.options) {
-			const missing = Object.keys(selectedProduct.options).filter((key) => !selectedOptions[key]);
+			const missing = Object.keys(selectedProduct.options).filter(
+				(key) => !selectedOptions[key]
+			);
 			if (missing.length > 0) {
 				toast.error("Please select all options before adding to cart.", {
 					duration: 1000,
-				})
+				});
 				return;
 			}
 		}
@@ -97,7 +101,7 @@ const ProductDetails = ({ productId }: ProductDetailsProps) => {
 				});
 			})
 			.catch(() => {
-				toast.error("Failed to add to cart.", {duration:1000})
+				toast.error("Failed to add to cart.", { duration: 1000 });
 			})
 			.finally(() => {
 				setIsButtonDisabled(false);
@@ -117,7 +121,9 @@ const ProductDetails = ({ productId }: ProductDetailsProps) => {
 	}
 
 	// check if the selected product has options
-	const hasOptions = !!selectedProduct.options && Object.keys(selectedProduct.options).length > 0;
+	const hasOptions =
+		!!selectedProduct.options &&
+		Object.keys(selectedProduct.options).length > 0;
 	const effectivePrice = selectedProduct.discountPrice ?? selectedProduct.price;
 	return (
 		<div className="p-6">
@@ -143,7 +149,9 @@ const ProductDetails = ({ productId }: ProductDetailsProps) => {
 							<div className="mb-4">
 								<img
 									src={mainImage || selectedProduct.images[0]?.url}
-									alt={selectedProduct.images[0]?.altText || selectedProduct.name}
+									alt={
+										selectedProduct.images[0]?.altText || selectedProduct.name
+									}
 									className="w-full h-auto object-cover rounded-lg"
 								/>
 							</div>
@@ -167,35 +175,40 @@ const ProductDetails = ({ productId }: ProductDetailsProps) => {
 							<h1 className="text-2xl md:text-3xl font-semibold mb-2">
 								{selectedProduct.name}
 							</h1>
-							{selectedProduct.discountPrice && (<p className="text-lg text-gray-600 mb-1 line-through">
-								
+							{selectedProduct.discountPrice && (
+								<p className="text-lg text-gray-600 mb-1 line-through">
 									IDR {selectedProduct.price.toLocaleString()}
-							</p>)}
+								</p>
+							)}
 							<p className="text-xl text-gray-500 mb-2">
 								IDR {effectivePrice.toLocaleString()}
 							</p>
 							<p className="text-gray-600 mb-4">
 								{selectedProduct.description}
 							</p>
-							{hasOptions && Object.entries(selectedProduct.options!).map(([key, values]) => (
-
-								<div className="mb-4" key={key}>
-									<p className="text-gray-700 capitalize">{key}:</p>
-									<div className="flex gap-2 mt-2">
-										{values.map((value) => (
-											<button
-												key={value}
-												onClick={() => handleOptionSelect(key, value)}
-												className={`px-4 py-2 rounded border ${
-													selectedOptions[key] === value
-														? "bg-black text-white"
-														: ""
-												}`}
-											>{value}</button>
-										))}
-									</div>
-								</div>
-							))}
+							{hasOptions &&
+								Object.entries(selectedProduct.options!).map(
+									([key, values]) => (
+										<div className="mb-4" key={key}>
+											<p className="text-gray-700 capitalize">{key}:</p>
+											<div className="flex gap-2 mt-2">
+												{values.map((value) => (
+													<button
+														key={value}
+														onClick={() => handleOptionSelect(key, value)}
+														className={`px-4 py-2 rounded border ${
+															selectedOptions[key] === value
+																? "bg-black text-white"
+																: ""
+														}`}
+													>
+														{value}
+													</button>
+												))}
+											</div>
+										</div>
+									)
+								)}
 							<div className="mb-6">
 								<p className="text-gray-700">Quantity:</p>
 								<div className="flex items-center space-x-4 mt-2">
@@ -234,11 +247,11 @@ const ProductDetails = ({ productId }: ProductDetailsProps) => {
 											<td className="py-1">{selectedProduct.material}</td>
 										</tr>
 										{selectedProduct.weight && (
-                    <tr>
-                      <td className="py-1">Weight</td>
-                      <td className="py-1">{selectedProduct.weight} kg</td>
-                    </tr>
-                  )}
+											<tr>
+												<td className="py-1">Weight</td>
+												<td className="py-1">{selectedProduct.weight} kg</td>
+											</tr>
+										)}
 									</tbody>
 								</table>
 							</div>

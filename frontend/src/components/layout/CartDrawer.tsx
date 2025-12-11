@@ -1,6 +1,7 @@
 import { IoMdClose } from "react-icons/io";
 import CartContents from "../cart/CartContents";
 import { useNavigate } from "react-router-dom";
+import { useAppSelector } from "../../redux/hooks";
 
 type CartDrawerProps = {
 	drawerOpen: boolean;
@@ -9,9 +10,17 @@ type CartDrawerProps = {
 
 const Cartdrawer = ({ drawerOpen, toggleCartDrawer }: CartDrawerProps) => {
 	const navigate = useNavigate();
+	const { user, guestId } = useAppSelector((state) => state.auth);
+	const { cart } = useAppSelector((state) => state.cart);
+	const userId = user?._id;
+
 	const handleCheckout = () => {
 		toggleCartDrawer();
-		navigate("/checkout");
+		if (!user) {
+			navigate("/login?redirect=checkout");
+		} else {
+			navigate("/checkout");
+		}
 	};
 	return (
 		<div
@@ -28,18 +37,26 @@ const Cartdrawer = ({ drawerOpen, toggleCartDrawer }: CartDrawerProps) => {
 			{/* Cart contents with a scrollable area */}
 			<div className="grow px-4 overflow-y-auto">
 				<h2 className="text-xl font-semibold mb-4">Your Cart</h2>
-				<CartContents />
+				{cart && cart?.products?.length > 0 ? (
+					<CartContents cart={cart} userId={userId} guestId={guestId} />
+				) : (
+					<p>Your cart is empty.</p>
+				)}
 			</div>
 			<div className="p-4 bg-white sticky bottom-0">
-				<button
-					onClick={handleCheckout}
-					className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition hover:cursor-pointer"
-				>
-					Checkout
-				</button>
-				<p className="text-xs tracking-tighter text-gray-500 mt-2 text-center">
-					Shipping, taxes, and discount codes calculated at checkout.
-				</p>
+				{cart && cart?.products?.length > 0 && (
+					<>
+						<button
+							onClick={handleCheckout}
+							className="w-full bg-black text-white py-3 rounded-lg font-semibold hover:bg-gray-800 transition hover:cursor-pointer"
+						>
+							Checkout
+						</button>
+						<p className="text-xs tracking-tighter text-gray-500 mt-2 text-center">
+							Shipping, taxes, and discount codes calculated at checkout.
+						</p>
+					</>
+				)}
 			</div>
 		</div>
 	);
