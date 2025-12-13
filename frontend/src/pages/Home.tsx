@@ -7,7 +7,7 @@ import Hero from "../components/layout/Hero";
 // import ProductsCollection from "../components/products/ProductsCollection";
 import IntroSection from "../components/landing/IntroSection";
 import Carousel from "../components/landing/carousel/Carousel";
-import { useAppDispatch } from "../redux/hooks";
+// import { useAppDispatch } from "../redux/hooks";
 // import type { Product } from "../types/products";
 // import { useEffect, useState } from "react";
 // import { fetchProducts } from "../redux/slices/productsSlice";
