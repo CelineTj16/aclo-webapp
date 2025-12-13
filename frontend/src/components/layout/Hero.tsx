@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import heroImg from "../../assets/hero-img1.jpg";
+// import heroImg from "../../assets/hero-img1.jpg";
 import Navbar from "../common/Navbar";
 import { assets, cloudinaryImageUrl } from "../../constants/cloudinary";
 

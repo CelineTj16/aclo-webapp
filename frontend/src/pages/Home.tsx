@@ -7,7 +7,7 @@ import Hero from "../components/layout/Hero";
 // import ProductsCollection from "../components/products/ProductsCollection";
 import IntroSection from "../components/landing/IntroSection";
 import Carousel from "../components/landing/carousel/Carousel";
-import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { useAppDispatch } from "../redux/hooks";
 // import type { Product } from "../types/products";
 // import { useEffect, useState } from "react";
 // import { fetchProducts } from "../redux/slices/productsSlice";
@@ -17,7 +17,7 @@ import KeyFeaturesSection from "../components/landing/KeyFeaturesSection";
 import ReviewsSection from "../components/landing/ReviewsSection";
 
 const Home = () => {
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   // const { products, loading, error } = useAppSelector(
   //   (state) => state.products
   // );
