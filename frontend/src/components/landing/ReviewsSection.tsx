@@ -10,17 +10,7 @@ import { cloudinaryImageUrl } from "../../constants/cloudinary";
 import { StarIcon } from "@heroicons/react/24/solid";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { fetchFeatReviews } from "../../redux/slices/reviewsSlice";
-
-type ReviewSlide = {
-	publicId: string;
-	alt: string;
-	productLabel: string;
-	stars: number;
-	quote: string;
-	author: string;
-	ctaTo: string;
-	ctaText?: string;
-};
+import type { ReviewSlide } from "../../types/carousels";
 
 const ANIM_MS = 500;
 const FAILSAFE_MS = ANIM_MS + 200;
@@ -190,37 +180,42 @@ const ReviewsSection: React.FC = () => {
 		setDragOffset(delta);
 	};
 
-	const endDrag = (e: React.PointerEvent) => {
-		if (!isDragging) return;
-		if (pointerIdRef.current !== e.pointerId) return;
+	const endDrag = useCallback(
+		(e: React.PointerEvent) => {
+			if (!isDragging) return;
+			if (pointerIdRef.current !== e.pointerId) return;
 
-		try {
-			(e.currentTarget as HTMLDivElement).releasePointerCapture(e.pointerId);
-		} catch {}
+			const target = e.currentTarget as HTMLDivElement;
 
-		const delta = dragOffset;
+			if (target.hasPointerCapture(e.pointerId)) {
+				target.releasePointerCapture(e.pointerId);
+			}
 
-		setIsDragging(false);
-		setDragOffset(0);
+			const delta = dragOffset;
 
-		const threshold = Math.max(40, viewportW * 0.12);
+			setIsDragging(false);
+			setDragOffset(0);
 
-		setIsAnimating(true);
+			const threshold = Math.max(40, viewportW * 0.12);
 
-		// Only lock if we're actually going to change slide
-		if (delta <= -threshold) {
-			if (!locked) lockForAnim();
-			setIndex((i) => i + 1);
-		} else if (delta >= threshold) {
-			if (!locked) lockForAnim();
-			setIndex((i) => i - 1);
-		} else {
-			// snap back only — no lock (prevents "stuck" if transitionend is missed)
-			unlock();
-		}
+			setIsAnimating(true);
 
-		pointerIdRef.current = null;
-	};
+			// Only lock if we're actually going to change slide
+			if (delta <= -threshold) {
+				if (!locked) lockForAnim();
+				setIndex((i) => i + 1);
+			} else if (delta >= threshold) {
+				if (!locked) lockForAnim();
+				setIndex((i) => i - 1);
+			} else {
+				// snap back only — no lock (prevents "stuck" if transitionend is missed)
+				unlock();
+			}
+
+			pointerIdRef.current = null;
+		},
+		[isDragging, dragOffset, viewportW, locked, lockForAnim, unlock]
+	);
 
 	if (loading) {
 		return <p>Loading...</p>;
@@ -273,7 +268,7 @@ const ReviewsSection: React.FC = () => {
 													<img
 														src={url}
 														alt={s.alt}
-														className="w-[220px] sm:w-[250px] md:w-[270px] aspect-3/4 object-cover rounded-[26px]"
+														className="w-55 sm:w-62.5 md:w-67.5 aspect-3/4 object-cover rounded-[26px]"
 														loading="lazy"
 														draggable={false}
 													/>
