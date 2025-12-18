@@ -33,7 +33,10 @@ const Topbar = () => {
             <img src={tokopediaLogo} className="h-6 w-6" alt="Tokopedia" />
           </a>
 
-          <a href="#" className={iconLinkClass}>
+          <a
+            href="https://vt.tiktok.com/ZSPDBMFXL/?page=Mall"
+            className={iconLinkClass}
+          >
             <img src={tiktokLogo} className="h-6 w-6" alt="TikTok" />
           </a>
         </div>
