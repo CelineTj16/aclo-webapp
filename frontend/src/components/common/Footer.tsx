@@ -11,11 +11,11 @@ const Footer = () => {
   return (
     <footer className="bg-mutedbrown py-12">
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 justify-center px-6 sm:px-8 lg:px-16 xl:px-24 2xl:px-32">
-        <div className="flex justify-center md:justify-start">
+        <div className="flex md:justify-start">
           <img
             src={cloudinaryImageUrl(assets.logos.vertical.publicId)}
             alt={assets.logos.vertical.alt}
-            className="h-[120px] w-[100px] object-cover"
+            className="w-[60px] h-full md:h-[120px] md:w-[100px] object-cover"
           />
         </div>
         {/* Shop links */}
@@ -61,7 +61,7 @@ const Footer = () => {
             </li>
           </ul>
         </div>
-        {/* Follow us section */}
+        {/* Stay in Touch section */}
         <div>
           <h3 className="text-lg text-acloblue mb-4">Stay in Touch</h3>
           <p className="text-gray-500 mb-4">
@@ -75,29 +75,36 @@ const Footer = () => {
             <input
               type="email"
               placeholder="Leave us your email"
-              className="p-3 w-full text-sm border-t border-l border-b border-acloblue rounded-l-md focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all"
+              className="w-full border-t border-l border-b border-acloblue rounded-l-md focus:outline-none transition-all p-4 text-base md:p-3 md:text-sm"
               required
             />
             <button
               type="submit"
               aria-label="Subscribe"
-              className="bg-acloblue text-white px-6 py-3 text-sm rounded-r-md hover:bg-gray-800 transition-all"
+              className="
+					group
+					bg-acloblue text-white
+					border border-acloblue
+					px-3 py-3 rounded-r-md
+
+					hover:bg-mutedbrown hover:text-acloblue
+				"
             >
-              <ArrowRightIcon className="h-5 w-5" />
+              <ArrowRightIcon className="h-8 w-8 md:h-5 md:w-5" />
             </button>
           </form>
         </div>
       </div>
 
       {/* Footer Bottom */}
-      <div className="container mx-auto mt-12 px-4 lg:px-0 border-t border-gray-200 pt-8 px-6 sm:px-8 lg:px-16 xl:px-24 2xl:px-32">
-        <div className="flex flex-col md:flex-row items-center md:items-start justify-between gap-8">
+      <div className="container mx-auto mt-12 border-t border-gray-200 pt-8 px-6 sm:px-8 lg:px-16 xl:px-24 2xl:px-32">
+        <div className="flex flex-col md:flex-row items-start md:items-start md:justify-between gap-8">
           {/* Follow Us */}
-          <div className="text-center md:text-left">
+          <div className="text-left">
             <h3 className="text-base font-semibold text-acloblue mb-3">
               Follow Us
             </h3>
-            <div className="flex items-center gap-4 justify-center md:justify-start text-gray-700">
+            <div className="flex items-center gap-4 justify-start text-gray-700">
               <a
                 href="https://www.instagram.com"
                 target="_blank"
@@ -105,7 +112,7 @@ const Footer = () => {
                 className="hover:text-gray-500"
                 aria-label="Instagram"
               >
-                <IoLogoInstagram className="h-6 w-6" />
+                <IoLogoInstagram className="w-11 h-11 md:w-6 md:h-6" />
               </a>
               <a
                 href="https://www.facebook.com"
@@ -114,7 +121,7 @@ const Footer = () => {
                 className="hover:text-gray-500"
                 aria-label="Facebook"
               >
-                <FaSquareFacebook className="h-5 w-5" />
+                <FaSquareFacebook className="w-10 h-10 md:w-6 md:h-6" />
               </a>
               <a
                 href="https://www.tiktok.com"
@@ -123,13 +130,13 @@ const Footer = () => {
                 className="hover:text-gray-500"
                 aria-label="TikTok"
               >
-                <AiFillTikTok className="h-6 w-6" />
+                <AiFillTikTok className="w-11 h-11 md:w-6 md:h-6" />
               </a>
             </div>
           </div>
 
           {/* WhatsApp */}
-          <div className="text-center md:text-right">
+          <div className="text-left md:text-right">
             <h3 className="text-base font-semibold text-acloblue mb-3">
               WhatsApp Us
             </h3>
@@ -137,7 +144,7 @@ const Footer = () => {
               href="https://api.whatsapp.com/send?phone=6282128528968&text=Halo%20ACLO!"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center md:justify-end gap-2 text-gray-700 hover:text-gray-500"
+              className="inline-flex items-center justify-start md:justify-end gap-2 text-gray-700 hover:text-gray-500"
             >
               <FiPhoneCall className="h-5 w-5" />
               <span>+62 821-2852-8968</span>
@@ -145,7 +152,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <p className="text-gray-500 text-sm tracking-tight text-center mt-8">
+        <p className="text-gray-500 text-sm tracking-tight text-left md:text-center mt-8">
           © 2025, Aclo. All Rights Reserved.
         </p>
       </div>
