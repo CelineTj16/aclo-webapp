@@ -68,7 +68,7 @@ const Navbar = () => {
             SHOP
           </Link>
           <Link
-            to="#"
+            to="/contact"
             className="text-ink hover:text-gray-600 uppercase font-light tracking-widest"
           >
             CONTACT
