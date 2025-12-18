@@ -8,7 +8,7 @@ const Contact: React.FC = () => {
     <main>
       <Navbar />
 
-      <section className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-16 xl:px-24 2xl:px-32 py-14 sm:py-16">
+      <section className="mx-auto w-full max-w-7xl 2xl:max-w-[1400px] px-6 sm:px-8 lg:px-16 xl:px-24 2xl:px-32 py-14 sm:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 xl:gap-24 items-center">
           <div className="w-full">
             <img
