@@ -62,13 +62,13 @@ const Navbar = () => {
             STORY
           </Link>
           <Link
-            to="#"
+            to="/collections/all"
             className="text-ink hover:text-gray-600 uppercase font-light tracking-widest"
           >
             SHOP
           </Link>
           <Link
-            to="#"
+            to="/contact"
             className="text-ink hover:text-gray-600 uppercase font-light tracking-widest"
           >
             CONTACT
