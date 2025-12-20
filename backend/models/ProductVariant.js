@@ -2,54 +2,69 @@ const mongoose = require("mongoose");
 
 // for inventory management
 const productVariantSchema = new mongoose.Schema(
-    {
-        product: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "Product",
-            required: true
-        },
-        sku: {
-            type: String,
-            required: true,
-            unique: true,
-        },
-        price: { 
-            type: Number, 
-            required: true 
-        },
-        discountPrice: {
+	{
+		productId: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Product",
+			required: true,
+		},
+		sku: {
+			type: String,
+			required: true,
+			unique: true,
+		},
+		price: {
+			type: Number,
+			required: true,
+			min: 0,
+		},
+		discountPrice: {
 			type: Number,
 			required: false,
+			min: 0,
 		},
-        countInStock: {
-            type: Number,
-            default: 0,
-        },
-        // flat, optional option fields
-        color: {
-            type: String,
-            required: false
-        },
-        stabiliser: {
-            type: String,
-            required: false
-        },
-        variant: {
-            type: String,
-            required: false
-        },
-        material: {
-            type: String,
-            required: false
-        },
-        images: [
-            {
-                url: String,
-                altText: String,
-            },
-        ],
-    },
-    { timestamps: true }
+		countInStock: {
+			type: Number,
+			default: 0,
+			min: 0,
+		},
+		category: {
+			type: String,
+			enum: ["Learning Tower", "Stool", "Utensils", "Accessories"],
+			required: true,
+		},
+		// flat, optional option fields
+		color: {
+			type: String,
+			required: false,
+		},
+		// stabiliser isn't included here because it will just be an add-on product
+		variant: {
+			type: String,
+			required: false,
+		},
+
+		images: {
+			type: [
+				{
+					url: {
+						type: String,
+						required: true,
+					},
+					altText: {
+						type: String,
+						required: false,
+					},
+				},
+			],
+			validate: {
+				validator: (arr) => Array.isArray(arr) && arr.length > 0,
+				message: "At least one image is required",
+			},
+			required: true,
+		},
+	},
+	{ timestamps: true }
 );
 
 module.exports = mongoose.model("ProductVariant", productVariantSchema);
