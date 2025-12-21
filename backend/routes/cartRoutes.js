@@ -1,9 +1,14 @@
 const express = require("express");
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
+const ProductVariant = require("../models/ProductVariant");
 const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
+
+const getUnitPrice = (pv) => {
+	return pv.discountPrice ?? pv.price;
+};
 
 // Helper function to get a cart by userId or guestId
 const getCart = async (userId, guestId) => {
@@ -28,37 +33,51 @@ const sameOptions = (a = {}, b = {}) => {
 // @desc Add a product to the cart for a guest or logged in user
 // @access Public
 router.post("/", async (req, res) => {
-	const { productId, quantity, options, guestId, userId } = req.body;
+	const { productId, productVariantId, quantity, options, guestId, userId } =
+		req.body;
 	try {
+		if (!productId || !productVariantId) {
+			return res
+				.status(400)
+				.json({ message: "productId and productVariantId are required" });
+		}
 		const product = await Product.findById(productId);
 		if (!product) return res.status(404).json({ message: "Product Not Found" });
 
+		const pv = await ProductVariant.findOne({
+			_id: productVariantId,
+			productId,
+		});
+		if (!pv)
+			return res.status(404).json({ message: "ProductVariant Not Found" });
+
+		const unitPrice = getUnitPrice(pv);
 		// Determine if user is logged in or guest
 		let cart = await getCart(userId, guestId);
 
 		// if the cart exists, update it
 		if (cart) {
-			const productIndex = cart.products.findIndex(
-				(p) =>
-					p.productId.toString() === productId &&
-					sameOptions(p.options, options)
+			const productVariantIndex = cart.products.findIndex(
+				(p) => p.productVariantId?.toString() === productVariantId
 			);
 
-			if (productIndex > -1) {
+			if (productVariantIndex > -1) {
 				// product alr exists, update the quantity
-				cart.products[productIndex].quantity += quantity;
+				cart.products[productVariantIndex].quantity += quantity;
+				cart.products[productVariantIndex].price = unitPrice;
 			} else {
 				// add new product
 				cart.products.push({
 					productId,
+					productVariantId,
 					name: product.name,
-					image: product.images[0].url,
-					price: product.price,
-					options,
+					image: pv.images?.[0]?.publicId,
+					options: product.options,
+					price: unitPrice,
 					quantity,
 				});
 			}
-
+			// TODO: calculate based on the bundle prices
 			// Recalculate total price
 			cart.totalPrice = cart.products.reduce(
 				(acc, item) => acc + item.price * item.quantity,
@@ -74,20 +93,21 @@ router.post("/", async (req, res) => {
 				products: [
 					{
 						productId,
+						productVariantId,
 						name: product.name,
-						image: product.images[0].url,
-						price: product.price,
-						options,
+						image: pv.images?.[0]?.publicId,
+						options: product.options,
+						price: unitPrice,
 						quantity,
 					},
 				],
-				totalPrice: product.price * quantity,
+				totalPrice: unitPrice * quantity,
 			});
 			return res.status(201).json(newCart);
 		}
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({message: "Server Error"});
+		res.status(500).json({ message: "Server Error" });
 	}
 });
 
@@ -95,35 +115,39 @@ router.post("/", async (req, res) => {
 // @desc Update product quantity in the cart for a guest/logged-in user
 // @access Public
 router.put("/", async (req, res) => {
-	const { productId, quantity, options, guestId, userId } = req.body;
+	const { productVariantId, quantity, options, guestId, userId } = req.body;
 	try {
 		let cart = await getCart(userId, guestId);
 		if (!cart) return res.status(404).json({ message: "Cart Not Found" });
 
 		const productIndex = cart.products.findIndex(
 			(p) =>
-				p.productId.toString() === productId && sameOptions(p.options, options)
+				p.productVariantId?.toString() === productVariantId &&
+				sameOptions(p.options, options)
 		);
-		if (productIndex > -1) {
-			// update quantity
-			if (quantity > 0) {
-				cart.products[productIndex].quantity = quantity;
-			} else {
-				cart.products.splice(productIndex, 1); // remove product if quantity is 0
-			}
 
-			cart.totalPrice = cart.products.reduce(
-				(acc, item) => acc + item.price * item.quantity,
-				0
-			);
-			await cart.save();
-			return res.status(200).json(cart);
-		} else {
-			return res.status(404).json({ message: "Product not found in cart" });
+		if (productIndex === -1) {
+			return res.status(404).json({ message: "Item not found in cart" });
 		}
+		// update quantity
+		if (quantity > 0) {
+			cart.products[productIndex].quantity = quantity;
+			// refresh price from DB on update
+			const pv = await ProductVariant.findById(productVariantId);
+			if (pv) cart.products[idx].price = getUnitPrice(pv);
+		} else {
+			cart.products.splice(productIndex, 1); // remove product if quantity is 0
+		}
+
+		cart.totalPrice = cart.products.reduce(
+			(acc, item) => acc + item.price * item.quantity,
+			0
+		);
+		await cart.save();
+		return res.status(200).json(cart);
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({message: "Server Error"});
+		res.status(500).json({ message: "Server Error" });
 	}
 });
 
@@ -131,31 +155,31 @@ router.put("/", async (req, res) => {
 // @desc Remove a product from the cart
 // @access Public
 router.delete("/", async (req, res) => {
-	const { productId, options, guestId, userId } = req.body;
+	const { productVariantId, options, guestId, userId } = req.body;
 	try {
 		let cart = await getCart(userId, guestId);
 		if (!cart) return res.status(404).json({ message: "Cart Not Found" });
 
-		const productIndex = cart.products.findIndex(
+		const productVariantIndex = cart.products.findIndex(
 			(p) =>
-				p.productId.toString() === productId && sameOptions(p.options, options)
+				p.productVariantId.toString() === productVariantId &&
+				sameOptions(p.options, options)
 		);
 
-		if (productIndex > -1) {
-			cart.products.splice(productIndex, 1);
-
-			cart.totalPrice = cart.products.reduce(
-				(acc, item) => acc + item.price * item.quantity,
-				0
-			);
-			await cart.save();
-			return res.status(200).json(cart);
-		} else {
-			return res.status(404).json({ message: "Product not found in cart" });
+		if (productVariantIndex === -1) {
+			return res.status(404).json({ message: "Item not found in cart" });
 		}
+
+		cart.products.splice(productVariantIndex, 1);
+		cart.totalPrice = cart.products.reduce(
+			(acc, item) => acc + item.price * item.quantity,
+			0
+		);
+		await cart.save();
+		return res.status(200).json(cart);
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({message: "Server Error"});
+		res.status(500).json({ message: "Server Error" });
 	}
 });
 
@@ -174,7 +198,7 @@ router.get("/", async (req, res) => {
 		}
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({message: "Server Error"});
+		res.status(500).json({ message: "Server Error" });
 	}
 });
 
@@ -196,7 +220,8 @@ router.post("/merge", protect, async (req, res) => {
 				guestCart.products.forEach((guestItem) => {
 					const productIndex = userCart.products.findIndex(
 						(item) =>
-							item.productId.toString() === guestItem.productId.toString() &&
+							item.productVariantId.toString() ===
+								guestItem.productVariantId.toString() &&
 							sameOptions(item.options, guestItem.options)
 					);
 					if (productIndex > -1) {
@@ -239,7 +264,7 @@ router.post("/merge", protect, async (req, res) => {
 		}
 	} catch (error) {
 		console.error(error);
-		res.status(500).json({message: "Server Error"});
+		res.status(500).json({ message: "Server Error" });
 	}
 });
 

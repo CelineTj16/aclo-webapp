@@ -14,6 +14,8 @@ type ProductDetailsProps = {
 	productId?: string; // used when Home passes bestSeller productId
 };
 
+// TODO: when fetching product details, also need to auto fetch a default product variant
+
 const ProductDetails = ({ productId }: ProductDetailsProps) => {
 	const { id } = useParams<{ id: string }>();
 	const dispatch = useAppDispatch();

@@ -7,10 +7,16 @@ const cartItemSchema = new mongoose.Schema(
 			ref: "Product",
 			required: true,
 		},
+		productVariantId: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "ProductVariant",
+			required: true,
+		},
 		name: String,
 		image: String,
 		price: String,
 		options: {
+			// to display in UI
 			type: Object,
 			default: {},
 		},

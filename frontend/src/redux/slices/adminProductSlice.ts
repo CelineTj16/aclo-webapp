@@ -9,18 +9,23 @@ import type {
 	Product,
 	CreateProductPayload,
 	UpdateProductPayload,
-} from "../../types/products";
+} from "../../types/product";
 import type { AppError } from "../../types/error";
+import type { ProductVariant } from "../../types/productVariant";
 
 interface AdminProductState {
 	products: Product[];
+	selectedVariant: ProductVariant | null;
 	loading: boolean;
+	variantLoading: boolean;
 	error: string | null;
 }
 
 const initialState: AdminProductState = {
 	products: [],
+	selectedVariant: null,
 	loading: false,
+	variantLoading: false,
 	error: null,
 };
 
@@ -46,8 +51,15 @@ export const fetchAdminProducts = createAsyncThunk<
 
 // async thunk to create a new product
 export const createProduct = createAsyncThunk<
-	Product,
-	CreateProductPayload,
+	{ Product: Product; ProductVariant: ProductVariant },
+	CreateProductPayload & {
+		// admin create currently expects these variant fields too until the route is refactored
+		sku: string;
+		price: number;
+		discountPrice?: number;
+		countInStock: number;
+		category: "Learning Tower" | "Stool" | "Utensils" | "Accessories";
+	},
 	{ rejectValue: AppError }
 >("adminProducts/createProduct", async (productData, { rejectWithValue }) => {
 	try {
@@ -70,7 +82,11 @@ export const createProduct = createAsyncThunk<
 
 // async thunk to update an existing product
 export const updateProduct = createAsyncThunk<
-	Product,
+	{
+		product: Product;
+		updatedAllVariants: number;
+		productVariant: ProductVariant | null;
+	},
 	UpdateProductPayload,
 	{ rejectValue: AppError }
 >(
@@ -95,6 +111,33 @@ export const updateProduct = createAsyncThunk<
 	}
 );
 
+// async thunk to get product variant
+export const fetchProductVariant = createAsyncThunk<
+	ProductVariant,
+	{ productId: string; color?: string; variant?: string },
+	{ rejectValue: AppError }
+>(
+	"adminProducts/fetchVariant",
+	async ({ productId, color, variant }, { rejectWithValue }) => {
+		try {
+			const response = await axios.get<ProductVariant>(
+				`${API_URL}/api/admin/products/${productId}/variant`,
+				{
+					headers: getAuthHeader(),
+					params: { color, variant },
+				}
+			);
+			return response.data;
+		} catch (err) {
+			const error = err as AxiosError<AppError>;
+			if (error.response && error.response.data) {
+				return rejectWithValue(error.response.data);
+			}
+			return rejectWithValue({ message: "Failed to fetch product variant" });
+		}
+	}
+);
+
 // async thunk to delete a product
 export const deleteProduct = createAsyncThunk<
 	string,
@@ -114,6 +157,30 @@ export const deleteProduct = createAsyncThunk<
 		return rejectWithValue({ message: "Failed to delete product" });
 	}
 });
+
+// async thunk to delete a product variant
+export const deleteProductVariant = createAsyncThunk<
+	{ productId: string; variantId: string },
+	{ productId: string; variantId: string },
+	{ rejectValue: AppError }
+>(
+	"adminProducts/deleteVariant",
+	async ({ productId, variantId }, { rejectWithValue }) => {
+		try {
+			await axios.delete(
+				`${API_URL}/api/admin/products/${productId}/variants/${variantId}`,
+				{ headers: getAuthHeader() }
+			);
+			return { productId, variantId };
+		} catch (err) {
+			const error = err as AxiosError<AppError>;
+			if (error.response?.data) {
+				return rejectWithValue(error.response.data);
+			}
+			return rejectWithValue({ message: "Failed to delete product variant" });
+		}
+	}
+);
 
 const adminProductSlice = createSlice({
 	name: "adminProducts",
@@ -145,9 +212,16 @@ const adminProductSlice = createSlice({
 			})
 			.addCase(
 				createProduct.fulfilled,
-				(state, action: PayloadAction<Product>) => {
+				(
+					state,
+					action: PayloadAction<{
+						Product: Product;
+						ProductVariant: ProductVariant;
+					}>
+				) => {
 					state.loading = false;
-					state.products.push(action.payload);
+					state.products.push(action.payload.Product);
+					state.selectedVariant = action.payload.ProductVariant;
 				}
 			)
 			.addCase(createProduct.rejected, (state, action) => {
@@ -157,16 +231,27 @@ const adminProductSlice = createSlice({
 			// update product
 			.addCase(updateProduct.pending, (state) => {
 				state.loading = true;
+				state.error = null;
 			})
 			.addCase(
 				updateProduct.fulfilled,
-				(state, action: PayloadAction<Product>) => {
-					const updatedProduct = action.payload;
+				(
+					state,
+					action: PayloadAction<{
+						product: Product;
+						updatedAllVariants: number;
+						productVariant: ProductVariant | null;
+					}>
+				) => {
+					const updatedProduct = action.payload.product;
 					const index = state.products.findIndex(
 						(product) => product._id === updatedProduct._id
 					);
 					if (index !== -1) {
 						state.products[index] = updatedProduct;
+					}
+					if (action.payload.productVariant) {
+						state.selectedVariant = action.payload.productVariant;
 					}
 					state.loading = false;
 				}
@@ -193,6 +278,40 @@ const adminProductSlice = createSlice({
 			.addCase(deleteProduct.rejected, (state, action) => {
 				state.loading = false;
 				state.error = action.payload?.message || "Failed to delete product";
+			})
+			// fetch variant
+			.addCase(fetchProductVariant.pending, (state) => {
+				state.variantLoading = true;
+				state.error = null;
+			})
+			.addCase(
+				fetchProductVariant.fulfilled,
+				(state, action: PayloadAction<ProductVariant>) => {
+					state.variantLoading = false;
+					state.selectedVariant = action.payload;
+				}
+			)
+			.addCase(fetchProductVariant.rejected, (state, action) => {
+				state.variantLoading = false;
+				state.error =
+					action.payload?.message || "Failed to fetch product variant";
+			})
+
+			// delete variant
+			.addCase(deleteProductVariant.pending, (state) => {
+				state.variantLoading = true;
+				state.error = null;
+			})
+			.addCase(deleteProductVariant.fulfilled, (state) => {
+				state.variantLoading = false;
+				// We don't have variants list in this slice (only selectedVariant), so just clear it if needed.
+				// If variants[] is later added, remove it from the list here.
+				state.selectedVariant = null;
+			})
+			.addCase(deleteProductVariant.rejected, (state, action) => {
+				state.variantLoading = false;
+				state.error =
+					action.payload?.message || "Failed to delete product variant";
 			});
 	},
 });

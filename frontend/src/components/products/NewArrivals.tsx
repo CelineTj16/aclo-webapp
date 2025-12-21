@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import axios from "axios";
 import { API_URL } from "../../constants/api";
-import type { Product } from "../../types/products";
+import type { Product } from "../../types/product";
 
 const NewArrivals = () => {
 	const scrollRef = useRef<HTMLDivElement | null>(null);

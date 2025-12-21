@@ -5,12 +5,8 @@ const products = [
 			"✨ Mini Oven Mitt for Little Helpers (complement to the QUILL kid-size kitchen utensils)Sarung tangan ini dirancang khusus untuk tangan kecil anak. Aman, ringan, dan tahan panas — sempurna untuk anak yang suka membantu di dapur atau bermain peran memasak di rumah.\nSpesifikasi\nDimensi: 17.5 x 11 x 1 cm\nMaterial: Polyester, kapas, dan heat-Insulating needled cotton",
 		images: [
 			{
-				url: "https://picsum.photos/seed/quillMittens1/500/500",
-				altText: "Picture of Quill Mittens only",
-			},
-			{
-				url: "https://picsum.photos/seed/quillMittens2/500/500",
-				altText: "Picture of Quill Mittens and Kid",
+				publicId: "QUILL_MITTENS_ouvpoz",
+				alt: "Quill Mittens",
 			},
 		],
 		rating: 4.7,
@@ -32,12 +28,8 @@ const products = [
 		},
 		images: [
 			{
-				url: "https://picsum.photos/seed/stork1/500/500",
-				altText: "Picture of Stork only",
-			},
-			{
-				url: "https://picsum.photos/seed/stork2/500/500",
-				altText: "Picture of Stork and Kid",
+				publicId: "STORK-1_zlt3i8",
+				alt: "Stork",
 			},
 		],
 		rating: 4.81,
@@ -58,12 +50,8 @@ const products = [
 		},
 		images: [
 			{
-				url: "https://picsum.photos/seed/quill1/500/500",
-				altText: "Picture of Quill only",
-			},
-			{
-				url: "https://picsum.photos/seed/quill2/500/500",
-				altText: "Picture of Quill and Kid",
+				publicId: "QUILL_xvxmet",
+				alt: "Quill",
 			},
 		],
 		rating: 4.1,
@@ -82,12 +70,8 @@ const products = [
 		options: { variant: ["Stork", "Falcon"] },
 		images: [
 			{
-				url: "https://picsum.photos/seed/talon1/500/500",
-				altText: "Picture of Talon Stork only",
-			},
-			{
-				url: "https://picsum.photos/seed/talon2/500/500",
-				altText: "Picture of Talon Stork and Kid",
+				publicId: "TALON_srzloj",
+				alt: "Talon",
 			},
 		],
 		rating: 5.0,
@@ -106,12 +90,8 @@ const products = [
 		options: { color: ["Natural", "Snow"] },
 		images: [
 			{
-				url: "https://picsum.photos/seed/sparrow1/500/500",
-				altText: "Picture of Sparrow only",
-			},
-			{
-				url: "https://picsum.photos/seed/sparrow2/500/500",
-				altText: "Picture of Sparrow and Kid",
+				publicId: "SPARROW-1_ykme2r",
+				alt: "Sparrow",
 			},
 		],
 		rating: 4.5,
@@ -129,12 +109,8 @@ const products = [
 			"✨ BEAK - Wooden Cutting Board & Knife for Kids ✨ Talenan & pisau kayu ACLO dirancang khusus untuk anak-anak belajar memotong makanan dengan aman. Cocok untuk tangan kecil, ukuran ideal untuk penggunaan anak. Bahan tahan lama dan ramah lingkungan, mendukung kepercayaan diri anak.\nSpesifikasi\nDimensi talenan (panjang x lebar x tebal): 15.5 x 9.5 x 1.2 cm\nDimensi pisau (panjang x tinggi x tebal): 12.5 x 2.5 x 1.2 cm",
 		images: [
 			{
-				url: "https://picsum.photos/seed/beak1/500/500",
-				altText: "Picture of Beak only",
-			},
-			{
-				url: "https://picsum.photos/seed/beak2/500/500",
-				altText: "Picture of Beak and Kid",
+				publicId: "BEAK_oyabro",
+				alt: "Beak",
 			},
 		],
 		dimensions: {
@@ -154,12 +130,8 @@ const products = [
 		},
 		images: [
 			{
-				url: "https://picsum.photos/seed/falcon1/500/500",
-				altText: "Picture of Falcon only",
-			},
-			{
-				url: "https://picsum.photos/seed/falcon2/500/500",
-				altText: "Picture of Falcon and Kid",
+				publicId: "FALCON-1_gjqzmy",
+				alt: "Falcon",
 			},
 		],
 		rating: 4.95,

@@ -4,16 +4,12 @@ const productVariants = [
 		sku: "QL-MT",
 		price: 54000,
 		discountPrice: 39000,
-		countInStock: 199, // just for dev, because we seeded 1 order of quill mittens
+		countInStock: 199, // we seeded 1 order of quill mittens
 		category: "Utensils",
 		images: [
 			{
-				url: "https://picsum.photos/seed/quillMittens1/500/500",
-				altText: "Picture of Quill Mittens only",
-			},
-			{
-				url: "https://picsum.photos/seed/quillMittens2/500/500",
-				altText: "Picture of Quill Mittens and Kid",
+				publicId: "QUILL_MITTENS_ouvpoz",
+				alt: "Quill Mittens",
 			},
 		],
 	},
@@ -27,12 +23,8 @@ const productVariants = [
 		color: "Natural",
 		images: [
 			{
-				url: "https://picsum.photos/seed/stork1/500/500",
-				altText: "Picture of Stork only",
-			},
-			{
-				url: "https://picsum.photos/seed/stork2/500/500",
-				altText: "Picture of Stork and Kid",
+				publicId: "STORK-1_zlt3i8",
+				alt: "Stork",
 			},
 		],
 	},
@@ -46,12 +38,8 @@ const productVariants = [
 		color: "Cerulean",
 		images: [
 			{
-				url: "https://picsum.photos/seed/stork1/500/500",
-				altText: "Picture of Stork only",
-			},
-			{
-				url: "https://picsum.photos/seed/stork2/500/500",
-				altText: "Picture of Stork and Kid",
+				publicId: "STORK-1_zlt3i8",
+				alt: "Stork",
 			},
 		],
 	},
@@ -65,12 +53,8 @@ const productVariants = [
 		color: "Silver",
 		images: [
 			{
-				url: "https://picsum.photos/seed/stork1/500/500",
-				altText: "Picture of Stork only",
-			},
-			{
-				url: "https://picsum.photos/seed/stork2/500/500",
-				altText: "Picture of Stork and Kid",
+				publicId: "STORK-1_zlt3i8",
+				alt: "Stork",
 			},
 		],
 	},
@@ -84,12 +68,8 @@ const productVariants = [
 		color: "Snow",
 		images: [
 			{
-				url: "https://picsum.photos/seed/stork1/500/500",
-				altText: "Picture of Stork only",
-			},
-			{
-				url: "https://picsum.photos/seed/stork2/500/500",
-				altText: "Picture of Stork and Kid",
+				publicId: "STORK-1_zlt3i8",
+				alt: "Stork",
 			},
 		],
 	},
@@ -102,12 +82,8 @@ const productVariants = [
 		category: "Utensils",
 		images: [
 			{
-				url: "https://picsum.photos/seed/quill1/500/500",
-				altText: "Picture of Quill only",
-			},
-			{
-				url: "https://picsum.photos/seed/quill2/500/500",
-				altText: "Picture of Quill and Kid",
+				publicId: "QUILL_xvxmet",
+				alt: "Quill",
 			},
 		],
 	},
@@ -121,12 +97,8 @@ const productVariants = [
 		variant: "Stork",
 		images: [
 			{
-				url: "https://picsum.photos/seed/talon1/500/500",
-				altText: "Picture of Talon Stork only",
-			},
-			{
-				url: "https://picsum.photos/seed/talon2/500/500",
-				altText: "Picture of Talon Stork and Kid",
+				publicId: "TALON_srzloj",
+				alt: "Talon",
 			},
 		],
 	},
@@ -140,12 +112,8 @@ const productVariants = [
 		variant: "Falcon",
 		images: [
 			{
-				url: "https://picsum.photos/seed/talon1/500/500",
-				altText: "Picture of Talon Stork only",
-			},
-			{
-				url: "https://picsum.photos/seed/talon2/500/500",
-				altText: "Picture of Talon Stork and Kid",
+				publicId: "TALON_srzloj",
+				alt: "Talon",
 			},
 		],
 	},
@@ -159,12 +127,8 @@ const productVariants = [
 		color: "Natural",
 		images: [
 			{
-				url: "https://picsum.photos/seed/sparrow1/500/500",
-				altText: "Picture of Sparrow only",
-			},
-			{
-				url: "https://picsum.photos/seed/sparrow2/500/500",
-				altText: "Picture of Sparrow and Kid",
+				publicId: "SPARROW-1_ykme2r",
+				alt: "Sparrow",
 			},
 		],
 	},
@@ -178,12 +142,8 @@ const productVariants = [
 		color: "Snow",
 		images: [
 			{
-				url: "https://picsum.photos/seed/sparrow1/500/500",
-				altText: "Picture of Sparrow only",
-			},
-			{
-				url: "https://picsum.photos/seed/sparrow2/500/500",
-				altText: "Picture of Sparrow and Kid",
+				publicId: "SPARROW-1_ykme2r",
+				alt: "Sparrow",
 			},
 		],
 	},
@@ -196,12 +156,8 @@ const productVariants = [
 		category: "Utensils",
 		images: [
 			{
-				url: "https://picsum.photos/seed/beak1/500/500",
-				altText: "Picture of Beak only",
-			},
-			{
-				url: "https://picsum.photos/seed/beak2/500/500",
-				altText: "Picture of Beak and Kid",
+				publicId: "BEAK_oyabro",
+				alt: "Beak",
 			},
 		],
 	},
@@ -215,12 +171,8 @@ const productVariants = [
 		color: "Natural",
 		images: [
 			{
-				url: "https://picsum.photos/seed/falcon1/500/500",
-				altText: "Picture of Falcon only",
-			},
-			{
-				url: "https://picsum.photos/seed/falcon2/500/500",
-				altText: "Picture of Falcon and Kid",
+				publicId: "FALCON-1_gjqzmy",
+				alt: "Falcon",
 			},
 		],
 	},
@@ -234,12 +186,8 @@ const productVariants = [
 		color: "Sunshine",
 		images: [
 			{
-				url: "https://picsum.photos/seed/falcon1/500/500",
-				altText: "Picture of Falcon only",
-			},
-			{
-				url: "https://picsum.photos/seed/falcon2/500/500",
-				altText: "Picture of Falcon and Kid",
+				publicId: "FALCON-1_gjqzmy",
+				alt: "Falcon",
 			},
 		],
 	},
@@ -253,12 +201,8 @@ const productVariants = [
 		color: "Silver",
 		images: [
 			{
-				url: "https://picsum.photos/seed/falcon1/500/500",
-				altText: "Picture of Falcon only",
-			},
-			{
-				url: "https://picsum.photos/seed/falcon2/500/500",
-				altText: "Picture of Falcon and Kid",
+				publicId: "FALCON-1_gjqzmy",
+				alt: "Falcon",
 			},
 		],
 	},

@@ -47,11 +47,11 @@ const productVariantSchema = new mongoose.Schema(
 		images: {
 			type: [
 				{
-					url: {
+					publicId: {
 						type: String,
 						required: true,
 					},
-					altText: {
+					alt: {
 						type: String,
 						required: false,
 					},

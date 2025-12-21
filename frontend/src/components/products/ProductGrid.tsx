@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import type { Product } from "../../types/products";
+import type { Product } from "../../types/product";
+import { cloudinaryImageUrl } from "../../constants/cloudinary";
 
 type ProductGridProps = {
 	products: Product[];
@@ -22,8 +23,8 @@ const ProductGrid = ({ products, loading, error }: ProductGridProps) => {
 					<div className="bg-white p-4 rounded-lg">
 						<div className="w-full h-96 mb-3">
 							<img
-								src={product.images[0].url}
-								alt={product.images[0].altText || product.name}
+								src={cloudinaryImageUrl(product.images[0].publicId)}
+								alt={product.images[0].alt || product.name}
 								className="w-full h-full object-cover rounded-lg"
 							/>
 						</div>

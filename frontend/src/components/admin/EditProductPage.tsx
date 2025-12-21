@@ -5,18 +5,47 @@ import { fetchProductDetails } from "../../redux/slices/productsSlice";
 import { updateProduct } from "../../redux/slices/adminProductSlice";
 import { API_URL } from "../../constants/api";
 import axios from "axios";
-import type { Product, ProductImage } from "../../types/products";
+import type {
+	AddOnProduct,
+	Product,
+	ProductCategory,
+	ProductDimensions,
+	ProductImage,
+	ProductOptions,
+} from "../../types/product";
+import type { ProductVariant } from "../../types/productVariant";
+import { cloudinaryImageUrl } from "../../constants/cloudinary";
 
+type ProductVariantData = {
+	variantId: string; // required for variant-specific updates
+	sku: string;
+	price: number;
+	discountPrice?: number;
+	countInStock: number;
+	category: ProductCategory;
+	color?: string;
+	variant?: string;
+	variantImages: ProductImage[];
+};
 type ProductData = {
 	name: string;
 	description: string;
-	price: number;
-	countInStock: number;
-	sku: string;
-	category: Product["category"];
+	// product fields
 	images: ProductImage[];
-	color: string[]; // will be stored in options.color when submitted (if any)
-	material: string;
+	isListed: boolean;
+	dimensions?: ProductDimensions;
+	weight?: number;
+	addOnProducts?: AddOnProduct[];
+	// options editing (we'll only expose color here like your current page)
+	optionsColorRaw: string; // raw input string (fixes comma/space typing issues)
+	optionsVariantRaw: string;
+};
+
+const parseCommaList = (raw: string): string[] => {
+	return raw
+		.split(",")
+		.map((s) => s.trim())
+		.filter(Boolean);
 };
 
 const EditProductPage = () => {
@@ -42,6 +71,7 @@ const EditProductPage = () => {
 	useEffect(() => {
 		if (id) {
 			dispatch(fetchProductDetails({ id }));
+			dispatch();
 		}
 	}, [dispatch, id]);
 
@@ -87,7 +117,7 @@ const EditProductPage = () => {
 			});
 			setProductData((prevData) => ({
 				...prevData,
-				images: [...prevData.images, { url: data.imageUrl, altText: "" }],
+				images: [...prevData.images, { publicId: data.publicId, altText: "" }],
 			}));
 			setUploading(false);
 		} catch (error) {
@@ -227,8 +257,8 @@ const EditProductPage = () => {
 						{productData.images.map((image, index) => (
 							<div key={index}>
 								<img
-									src={image.url}
-									alt={image.altText || "Product Image"}
+									src={cloudinaryImageUrl(image.publicId)}
+									alt={image.alt || "Product Image"}
 									className="w-20 h-20 object-cover rounded-md shadow-md"
 								/>
 							</div>

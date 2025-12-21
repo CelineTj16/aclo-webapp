@@ -13,42 +13,147 @@ const orders = require("./data/orders");
 
 dotenv.config();
 
-// connect to MongoDB
-mongoose.connect(process.env.MONGO_URI);
+// HELPERS
+async function connectDB() {
+	if (!process.env.MONGO_URI) throw new Error("MONGO_URI is missing in .env");
+	await mongoose.connect(process.env.MONGO_URI);
+}
 
-// function to seed data
+async function clearCollections() {
+	await Promise.all([
+		Product.deleteMany(),
+		ProductVariant.deleteMany(),
+		User.deleteMany(),
+		Cart.deleteMany(),
+		Review.deleteMany(),
+		Order.deleteMany(),
+	]);
+}
+
+async function createAdminUser() {
+	return User.create({
+		name: "Admin User",
+		email: "admin@example.com",
+		password: "123456",
+		role: "admin",
+	});
+}
+
+function findByContains(allProducts, keyword) {
+	const k = keyword.toLowerCase();
+	return allProducts.find((p) => p.name?.toLowerCase().includes(k));
+}
+
+function buildAddOn(productId, options, pricing) {
+	return {
+		productId,
+		...(options ? { options } : {}),
+		pricing: pricing ?? { discountType: "none", amount: 0 },
+	};
+}
+
+async function attachAddOns({ stork, falcon, quill, talon, quillMittens }) {
+	// Use bulkWrite so this is 1 roundtrip instead of 3
+	const ops = [
+		{
+			updateOne: {
+				filter: { _id: stork._id },
+				update: {
+					$set: {
+						addOnProducts: [
+							buildAddOn(
+								talon._id,
+								{ variant: "Stork" },
+								{ discountType: "fixed", amount: 100000 }
+							),
+						],
+					},
+				},
+			},
+		},
+		{
+			updateOne: {
+				filter: { _id: falcon._id },
+				update: {
+					$set: {
+						addOnProducts: [
+							buildAddOn(
+								talon._id,
+								{ variant: "Falcon" },
+								{ discountType: "fixed", amount: 100000 }
+							),
+						],
+					},
+				},
+			},
+		},
+		{
+			updateOne: {
+				filter: { _id: quill._id },
+				update: {
+					$set: {
+						addOnProducts: [
+							buildAddOn(quillMittens._id, null, {
+								discountType: "none",
+								amount: 0,
+							}),
+						],
+					},
+				},
+			},
+		},
+	];
+
+	await Product.bulkWrite(ops);
+}
+
+function buildSampleOrders({ insertedProducts, insertedVariants, userId }) {
+	const p0 = insertedProducts[0];
+	if (!p0) throw new Error("No products inserted; cannot build sample orders.");
+
+	const p0Variant = insertedVariants.find(
+		(pv) => pv.productId.toString() === p0._id.toString()
+	);
+
+	if (!p0Variant) {
+		throw new Error(
+			`No variant found for first product (${p0.name}). Check your variant mappings.`
+		);
+	}
+
+	return orders.map((order) => ({
+		...order,
+		user: userId,
+		orderItems: [
+			{
+				productId: p0._id,
+				name: p0.name,
+				image:
+					p0Variant.images?.[0]?.publicId || p0Variant.images?.[0]?.alt || "",
+				price: p0Variant.discountPrice ?? p0Variant.price,
+				quantity: 1,
+			},
+		],
+	}));
+}
+
+// SEEDER
 const seedData = async () => {
 	try {
-		// clear existing data
-		await Product.deleteMany();
-		await ProductVariant.deleteMany();
-		await User.deleteMany();
-		await Cart.deleteMany();
-		await Review.deleteMany();
-		await Order.deleteMany();
+		await connectDB();
+		await clearCollections();
 
 		// create default admin user
-		const createdUser = await User.create({
-			name: "Admin User",
-			email: "admin@example.com",
-			password: "123456",
-			role: "admin",
-		});
+		const admin = await createAdminUser();
+		const userId = admin._id;
 
-		// assign default user ID to each product
-		const userID = createdUser._id;
 		const sampleProducts = products.map((product) => {
-			return { ...product, user: userID };
+			return { ...product, user: userId };
 		});
 		// Insert Products
 		const insertedProducts = await Product.insertMany(sampleProducts);
 
 		// Grab all the products
-		const findByContains = (products, keyword) =>
-			products.find((p) =>
-				p.name?.toLowerCase().includes(keyword.toLowerCase())
-			);
-
 		const stork = findByContains(insertedProducts, "stork");
 		const falcon = findByContains(insertedProducts, "falcon");
 		const talon = findByContains(insertedProducts, "talon");
@@ -74,56 +179,7 @@ const seedData = async () => {
 		// Inject addOnProducts into STORK and FALCON with TALON add-on
 		// Inject addOnProducts into QUILL with Oven mitten add-on
 		// With: Correct variant option & bundle pricing discount
-		const talonAddOnForStork = {
-			productId: talon._id,
-			options: { variant: "Stork" },
-			pricing: {
-				discountType: "fixed",
-				amount: 100000,
-			},
-		};
-
-		const talonAddOnForFalcon = {
-			productId: talon._id,
-			options: { variant: "Falcon" },
-			pricing: {
-				discountType: "fixed",
-				amount: 100000,
-			},
-		};
-
-		const mittensAddOnForQuill = {
-			productId: quillMittens._id,
-			pricing: {
-				discountType: "none",
-				amount: 0,
-			},
-		};
-
-		await Product.updateOne(
-			{ _id: stork._id },
-			{
-				$set: {
-					addOnProducts: [talonAddOnForStork],
-				},
-			}
-		);
-		await Product.updateOne(
-			{ _id: falcon._id },
-			{
-				$set: {
-					addOnProducts: [talonAddOnForFalcon],
-				},
-			}
-		);
-		await Product.updateOne(
-			{ _id: quill._id },
-			{
-				$set: {
-					addOnProducts: [mittensAddOnForQuill],
-				},
-			}
-		);
+		await attachAddOns(refs);
 
 		// Insert productId mappings for all Product Variants
 		const variantsWithProductId = productVariants.map((variant) => {
@@ -177,24 +233,10 @@ const seedData = async () => {
 		);
 
 		// Retrieve the first product & it's variant and create a sample Order with it
-		const p0 = insertedProducts[0];
-		const p0Variant = insertedVariants.find(
-			(pv) => pv.productId.toString() === p0._id.toString()
-		);
-		const sampleOrders = orders.map((order) => {
-			return {
-				...order,
-				user: userID,
-				orderItems: [
-					{
-						productId: p0._id,
-						name: p0.name,
-						image: p0Variant.images?.[0]?.url || "",
-						price: p0Variant.discountPrice ?? p0Variant.price,
-						quantity: 1,
-					},
-				],
-			};
+		const sampleOrders = buildSampleOrders({
+			insertedProducts,
+			insertedVariants,
+			userId,
 		});
 
 		// Insert add on products for the right products
