@@ -2,9 +2,7 @@ import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchProductDetails } from "../../redux/slices/productsSlice";
-import {
-  updateProduct,
-} from "../../redux/slices/adminProductSlice";
+// import { updateProduct } from "../../redux/slices/adminProductSlice";
 import { fetchProductVariants } from "../../redux/slices/productsSlice";
 import { API_URL } from "../../constants/api";
 import axios from "axios";
