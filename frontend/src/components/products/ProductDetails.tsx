@@ -125,7 +125,6 @@ const ProductDetails = () => {
     searchParams.forEach((value, key) => {
       finalOptions[key] = value;
     });
-    console.log(finalOptions);
     dispatch(
       addToCart({
         productId: id,

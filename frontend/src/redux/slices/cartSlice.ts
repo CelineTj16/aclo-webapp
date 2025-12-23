@@ -128,7 +128,7 @@ export const updateCartItemQuantity = createAsyncThunk<
 export const removeFromCart = createAsyncThunk<
   Cart,
   {
-    productId: string;
+    productVariantId: string;
     options?: Record<string, any>;
     guestId?: string;
     userId?: string;
@@ -136,11 +136,14 @@ export const removeFromCart = createAsyncThunk<
   { rejectValue: AppError }
 >(
   "cart/removeFromCart",
-  async ({ productId, options, guestId, userId }, { rejectWithValue }) => {
+  async (
+    { productVariantId, options, guestId, userId },
+    { rejectWithValue }
+  ) => {
     try {
       // diff syntax because DELETE method in axios treats 2nd argument as options, not as req body
       const response = await axios.delete<Cart>(`${API_URL}/api/cart`, {
-        data: { productId, options, guestId, userId },
+        data: { productVariantId, options, guestId, userId },
       });
       return response.data;
     } catch (err) {

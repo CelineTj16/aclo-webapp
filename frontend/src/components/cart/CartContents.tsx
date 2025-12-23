@@ -38,10 +38,10 @@ const CartContents = ({ cart, userId, guestId }: CartContentsProps) => {
   };
 
   const handleRemoveFromCart = (
-    productId: string,
+    productVariantId: string,
     options?: Record<string, any>
   ) => {
-    dispatch(removeFromCart({ productId, options, guestId, userId }));
+    dispatch(removeFromCart({ productVariantId, options, guestId, userId }));
   };
 
   return (
@@ -109,7 +109,7 @@ const CartContents = ({ cart, userId, guestId }: CartContentsProps) => {
             <p>IDR {product.price.toLocaleString()}</p>
             <button
               onClick={() =>
-                handleRemoveFromCart(product.productId, product.options)
+                handleRemoveFromCart(product.productVariantId, product.options)
               }
             >
               <RiDeleteBinLine className="h-6 w-6 mt-2 text-red-600" />

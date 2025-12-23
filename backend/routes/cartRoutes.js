@@ -35,7 +35,6 @@ const sameOptions = (a = {}, b = {}) => {
 router.post("/", async (req, res) => {
   const { productId, productVariantId, quantity, options, guestId, userId } =
     req.body;
-  console.log(options);
   try {
     if (!productId || !productVariantId) {
       return res
@@ -117,22 +116,21 @@ router.post("/", async (req, res) => {
 // @desc Update product quantity in the cart for a guest/logged-in user
 // @access Public
 router.put("/", async (req, res) => {
+  const { productVariantId, quantity, options, guestId, userId } = req.body;
   if (!productVariantId) {
     return res.status(400).json({ message: "productVariantId is required" });
   }
   if (typeof quantity !== "number") {
     return res.status(400).json({ message: "quantity must be a number" });
   }
-  const { productVariantId, quantity, options, guestId, userId } = req.body;
   try {
     let cart = await getCart(userId, guestId);
     if (!cart) return res.status(404).json({ message: "Cart Not Found" });
 
-    const productIndex = cart.products.findIndex(
-      (p) =>
-        p.productVariantId?.toString() === productVariantId &&
-        sameOptions(p.options, options)
-    );
+    const productIndex = cart.products.findIndex((p) => {
+      p.productVariantId?.toString() === productVariantId &&
+        sameOptions(p.options, options);
+    });
 
     if (productIndex === -1) {
       return res.status(404).json({ message: "Item not found in cart" });
@@ -142,7 +140,7 @@ router.put("/", async (req, res) => {
       cart.products[productIndex].quantity = quantity;
       // refresh price from DB on update
       const pv = await ProductVariant.findById(productVariantId);
-      if (pv) cart.products[idx].price = getUnitPrice(pv);
+      if (pv) cart.products[productIndex].price = getUnitPrice(pv);
     } else {
       cart.products.splice(productIndex, 1); // remove product if quantity is 0
     }
@@ -168,11 +166,11 @@ router.delete("/", async (req, res) => {
     let cart = await getCart(userId, guestId);
     if (!cart) return res.status(404).json({ message: "Cart Not Found" });
 
-    const productVariantIndex = cart.products.findIndex(
-      (p) =>
-        p.productVariantId.toString() === productVariantId &&
-        sameOptions(p.options, options)
-    );
+    const productVariantIndex = cart.products.findIndex((p) => {
+      const sameVariant = p.productVariantId?.toString() === productVariantId;
+      const sameOpts = sameOptions(p.options, options);
+      return sameVariant && sameOpts;
+    });
 
     if (productVariantIndex === -1) {
       return res.status(404).json({ message: "Item not found in cart" });
