@@ -2,17 +2,17 @@ const puppeteer = require("puppeteer");
 
 /**
  * Generate shipping label in HTML from order data
- * TODO: Add shipping method, tracking number 
+ * TODO: Add shipping method
  */
 const generateShippingLabelHTML = (order) => {
 
     // TODO: this will be hardcoded, replace with actual sender address
 	const senderAddress = {
-		name: "ACLO Store",
+		name: "ACLO Kids",
 		address: "Jl. Example Street No. 123",
-		city: "Jakarta",
+		city: "KOTA JAKARTA UTARA",
 		postalCode: "12345",
-		phone: "+62 21 1234 5678",
+		phone: "+6282128528968",
 	};
 
     // ACLO logo
@@ -76,11 +76,6 @@ const generateShippingLabelHTML = (order) => {
             object-fit: contain;
         }
         
-        .courier {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        
         .order-info {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -129,10 +124,8 @@ const generateShippingLabelHTML = (order) => {
         }
         
         .shipping-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
+            display: flex;
+            justify-content: flex-end;
         }
         
         .shipping-box {
@@ -198,10 +191,12 @@ const generateShippingLabelHTML = (order) => {
         <div class="header">
             <div class="header-left">
                 <img src="${logoUrl}" alt="ACLO logo" class="logo-img" />
-                <div class="courier">Standard Shipping</div>
             </div>
-            <div class="tracking-id">
-                <strong>Tracking #:</strong> ${order._id.toString().substring(order._id.toString().length - 10).toUpperCase()}
+            <div class="shipping-info">
+                <div class="shipping-box">
+                    <div class="shipping-box-title">SHIPPING METHOD</div>
+                    <div class="shipping-box-content">Standard Shipping</div>
+                </div>
             </div>
         </div>
         
@@ -242,14 +237,6 @@ const generateShippingLabelHTML = (order) => {
             </div>
         </div>
         
-        <!-- Shipping Method -->
-        <div class="shipping-info">
-            <div class="shipping-box">
-                <div class="shipping-box-title">SHIPPING METHOD</div>
-                <div class="shipping-box-content">Standard Shipping</div>
-            </div>
-        </div>
-        
         <!-- Items Table -->
         <table class="items-table">
             <thead>
@@ -264,15 +251,20 @@ const generateShippingLabelHTML = (order) => {
             <tbody>
                 ${order.orderItems
 									.map(
-										(item, index) => `
+										(item, index) => {
+											const optionsText = item.options && Object.keys(item.options).length > 0
+												? Object.values(item.options).join(", ")
+												: "N/A";
+											return `
                     <tr>
                         <td>${index + 1}</td>
                         <td>${item.name}</td>
-                        <td>${item.productId.toString().substring(0, 8).toUpperCase()}</td>
-                        <td>${item.options && Object.keys(item.options).length > 0 ? Object.entries(item.options).map(([key, val]) => `${key}: ${val}`).join(", ") : "N/A"}</td>
+                        <td>${item.sku}</td>
+                        <td>${optionsText}</td>
                         <td>${item.quantity}</td>
                     </tr>
-                `
+                `;
+										}
 									)
 									.join("")}
             </tbody>

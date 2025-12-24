@@ -19,6 +19,10 @@ const orderItemSchema = new mongoose.Schema(
 			type: Number,
 			required: true,
 		},
+		sku: {
+			type: String,
+			required: true,
+		},
 		options: {
 			type: Object,
 			default: {},
@@ -26,6 +30,10 @@ const orderItemSchema = new mongoose.Schema(
 		quantity: {
 			type: Number,
 			required: true,
+		},
+		weight: {
+			type: Number,
+			default: 0,
 		},
 	},
 	{ _id: false }

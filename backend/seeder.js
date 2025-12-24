@@ -43,21 +43,33 @@ const seedData = async () => {
 		const p0 = insertedProducts[0];
 
 		const sampleOrders = orders.map((order) => {
-			return {
-				...order,
-				user: userID,
-				orderItems: [
-					{
-						productId: p0._id,
-						name: p0.name,
-						image: p0.images?.[0]?.url || "",
-						price: p0.price,
-						weight: p0.weight,
-						quantity: 1,
-					},
-				],
-			};
-		});
+		// retrieve first option from each option array
+		const selectedOptions = {};
+		if (p0.options && p0.options.size > 0) {
+			for (const [key, value] of p0.options.entries()) {
+				if (Array.isArray(value) && value.length > 0) {
+					selectedOptions[key] = value[0];
+				}
+			}
+		}
+
+		return {
+			...order,
+			user: userID,
+			orderItems: [
+				{
+					productId: p0._id,
+					name: p0.name,
+					image: p0.images?.[0]?.url || "",
+					price: p0.price,
+					weight: p0.weight,
+					sku: p0.sku,
+					options: selectedOptions,
+				quantity: 1,
+			},
+		],
+	};
+});
 
 		// insert products & reviews into the database
 
