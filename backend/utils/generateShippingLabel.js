@@ -2,8 +2,11 @@ const puppeteer = require("puppeteer");
 
 /**
  * Generate shipping label in HTML from order data
+ * TODO: Add shipping method, tracking number 
  */
 const generateShippingLabelHTML = (order) => {
+
+    // TODO: this will be hardcoded, replace with actual sender address
 	const senderAddress = {
 		name: "ACLO Store",
 		address: "Jl. Example Street No. 123",
@@ -12,11 +15,17 @@ const generateShippingLabelHTML = (order) => {
 		phone: "+62 21 1234 5678",
 	};
 
+    // ACLO logo
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const logoPublicId = "ACLO_LOGO_HORIZONTAL-06_1_mdrbx8";
+    const logoUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_auto,q_auto/${logoPublicId}`;
+
 	const orderDate = new Date(order.createdAt).toLocaleDateString("id-ID", {
 		day: "2-digit",
 		month: "2-digit",
 		year: "numeric",
 	});
+
 
     // return HTML string
 	return `
@@ -61,10 +70,10 @@ const generateShippingLabelHTML = (order) => {
             gap: 20px;
         }
         
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #ff4d00;
+        .logo-img {
+            height: 32px;
+            width: auto;
+            object-fit: contain;
         }
         
         .courier {
@@ -188,7 +197,7 @@ const generateShippingLabelHTML = (order) => {
         <!-- Header -->
         <div class="header">
             <div class="header-left">
-                <div class="logo">ACLO</div>
+                <img src="${logoUrl}" alt="ACLO logo" class="logo-img" />
                 <div class="courier">Standard Shipping</div>
             </div>
             <div class="tracking-id">
@@ -233,15 +242,11 @@ const generateShippingLabelHTML = (order) => {
             </div>
         </div>
         
-        <!-- Shipping Method & COD -->
+        <!-- Shipping Method -->
         <div class="shipping-info">
             <div class="shipping-box">
                 <div class="shipping-box-title">SHIPPING METHOD</div>
                 <div class="shipping-box-content">Standard Shipping</div>
-            </div>
-            <div class="shipping-box">
-                <div class="shipping-box-title">COD</div>
-                <div class="shipping-box-content">Rp 0</div>
             </div>
         </div>
         
@@ -280,7 +285,7 @@ const generateShippingLabelHTML = (order) => {
         
         <!-- Footer -->
         <div class="footer">
-            <p>Weight: ${order.orderItems.reduce((total, item) => total + item.quantity, 0) * 500}g | Total Items: ${order.orderItems.reduce((total, item) => total + item.quantity, 0)}</p>
+            <p>Weight: ${order.orderItems.reduce((total, item) => total + (item.weight || 0) * item.quantity, 0)}g | Total Items: ${order.orderItems.reduce((total, item) => total + item.quantity, 0)}</p>
             <p>This is an automated shipping label. Handle with care.</p>
         </div>
     </div>

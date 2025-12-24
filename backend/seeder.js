@@ -52,6 +52,7 @@ const seedData = async () => {
 						name: p0.name,
 						image: p0.images?.[0]?.url || "",
 						price: p0.price,
+						weight: p0.weight,
 						quantity: 1,
 					},
 				],
