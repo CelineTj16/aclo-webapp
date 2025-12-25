@@ -243,7 +243,6 @@ const generateShippingLabelHTML = (order) => {
                 <tr>
                     <th>#</th>
                     <th>Product Name</th>
-                    <th>SKU</th>
                     <th>Variant</th>
                     <th>Qty</th>
                 </tr>
@@ -252,15 +251,21 @@ const generateShippingLabelHTML = (order) => {
                 ${order.orderItems
 									.map(
 										(item, index) => {
-											const optionsText = item.options && Object.keys(item.options).length > 0
-												? Object.values(item.options).join(", ")
-												: "N/A";
+											let variantText = "N/A";
+											
+											if (item.productVariantId) {
+												const variant = item.productVariantId;
+												const variantParts = [];
+												if (variant.color) variantParts.push(variant.color);
+												if (variant.variant) variantParts.push(variant.variant);
+												if (variantParts.length > 0) variantText = variantParts.join(", ");
+											}
+											
 											return `
                     <tr>
                         <td>${index + 1}</td>
                         <td>${item.name}</td>
-                        <td>${item.sku}</td>
-                        <td>${optionsText}</td>
+                        <td>${variantText}</td>
                         <td>${item.quantity}</td>
                     </tr>
                 `;

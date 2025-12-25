@@ -65,7 +65,9 @@ router.delete("/:id", protect, admin, async (req, res) => {
 // @access Private/Admin
 router.get("/:id/shipping-label", protect, admin, async (req, res) => {
 	try {
-		const order = await Order.findById(req.params.id).populate("user", "name email");
+		const order = await Order.findById(req.params.id)
+		.populate("user", "name email")
+		.populate("orderItems.productVariantId");
 		
 		if (!order) {
 			return res.status(404).json({ message: "Order Not Found" });

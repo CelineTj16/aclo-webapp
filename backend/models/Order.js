@@ -24,10 +24,6 @@ const orderItemSchema = new mongoose.Schema(
 			type: Number,
 			required: true,
 		},
-		sku: {
-			type: String,
-			required: true,
-		},
 		options: {
 			type: Object,
 			default: {},
