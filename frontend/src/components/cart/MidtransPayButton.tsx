@@ -1,3 +1,7 @@
+import axios from "axios";
+import { useEffect } from "react";
+import { API_URL, getAuthHeader } from "../../constants/api";
+
 declare global {
   interface Window {
     snap?: {
@@ -39,6 +43,56 @@ const MidtransPayButton = ({
   amount,
   onSuccess,
   onError,
-}: MidtransPayButtonProps) => {};
+}: MidtransPayButtonProps) => {
+  useEffect(() => {
+    loadSnapScript().catch((e) => {
+      console.error(e);
+      onError?.(e);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handlePay = async () => {
+    try {
+      // ask backend to create transaction & return snap token
+      const { data } = await axios.post(
+        `${API_URL}/api/payments/midtrans/token`,
+        { checkoutId },
+        { headers: getAuthHeader() }
+      );
+
+      const token = data?.token as string | undefined;
+      if (!token) return new Error("No Midtrans snap token returned");
+
+      window.snap?.pay(token, {
+        onSuccess: function () {
+          onSuccess();
+        },
+        onPending: function () {
+          alert("Payment created. Please complete the payment in the popup.");
+        },
+        onError: function (err: unknown) {
+          onError?.(err);
+        },
+        onClose: function () {
+          // do nothing on user close popup
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      onError?.(err);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handlePay}
+      className="w-full bg-black text-white py-3 rounded"
+    >
+      Pay with Midtrans (IDR {amount.toLocaleString()})
+    </button>
+  );
+};
 
 export default MidtransPayButton;
