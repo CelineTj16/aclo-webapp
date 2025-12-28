@@ -62,7 +62,7 @@ const MidtransPayButton = ({
       );
 
       const token = data?.token as string | undefined;
-      if (!token) return new Error("No Midtrans snap token returned");
+      if (!token) throw new Error("No Midtrans snap token returned");
 
       window.snap?.pay(token, {
         onSuccess: function () {

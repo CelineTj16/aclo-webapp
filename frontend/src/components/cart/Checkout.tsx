@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import MidtransPayButton from "./MidtransPayButton";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { createCheckout } from "../../redux/slices/checkoutSlice";
-import { API_URL, getAuthHeader } from "../../constants/api";
-import axios from "axios";
+// import { API_URL, getAuthHeader } from "../../constants/api";
+// import axios from "axios";
 import type { Checkout, ShippingDetails } from "../../types/checkout";
 import { cloudinaryImageUrl } from "../../constants/cloudinary";
 
@@ -56,42 +56,20 @@ const Checkout = () => {
     }
   };
 
-  // const handlePaymentSuccess = async (details: Record<string, unknown>) => {
-  //   if (!checkoutId) {
-  //     console.error("No checkoutId available for payment update.");
-  //     return;
-  //   }
+  // const handleFinalizeCheckout = async (checkoutId: string) => {
   //   try {
-  //     await axios.put(
-  //       `${API_URL}/api/checkout/${checkoutId}/pay`,
-  //       {
-  //         paymentStatus: "paid",
-  //         paymentDetails: details,
-  //       },
-  //       {
-  //         headers: getAuthHeader(),
-  //       }
+  //     await axios.post(
+  //       `${API_URL}/api/checkout/${checkoutId}/finalize`,
+  //       {},
+  //       { headers: getAuthHeader() }
   //     );
-  //     await handleFinalizeCheckout(checkoutId); // finalize checkout if payment is successful
-  //   } catch (error) {
-  //     console.error(error);
+  //     navigate("/order-confirmation");
+  //   } catch (error: any) {
+  //     const msg = error?.response?.data?.message || "Finalize failed";
+  //     alert(msg);
+  //     console.error("Error in handleFinalizeCheckout:", error);
   //   }
   // };
-
-  const handleFinalizeCheckout = async (checkoutId: string) => {
-    try {
-      await axios.post(
-        `${API_URL}/api/checkout/${checkoutId}/finalize`,
-        {},
-        { headers: getAuthHeader() }
-      );
-      navigate("/order-confirmation");
-    } catch (error: any) {
-      const msg = error?.response?.data?.message || "Finalize failed";
-      alert(msg);
-      console.error("Error in handleFinalizeCheckout:", error);
-    }
-  };
 
   if (loading) return <p>Loading cart...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -207,7 +185,8 @@ const Checkout = () => {
                   checkoutId={checkoutId}
                   amount={cart.totalPrice}
                   onSuccess={() => {
-                    handleFinalizeCheckout(checkoutId);
+                    // handleFinalizeCheckout(checkoutId);
+                    navigate(`/order-processing?checkoutId=${checkoutId}`);
                   }}
                   onError={(err) => {
                     alert("Payment failed. Try again later.");

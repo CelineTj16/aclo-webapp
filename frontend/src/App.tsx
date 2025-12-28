@@ -28,6 +28,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Verified from "./pages/Verified";
 import Story from "./pages/Story";
 import Contact from "./pages/Contact";
+import OrderProcessingPage from "./pages/OrderProcessingPage";
 
 function App() {
   return (
@@ -58,6 +59,7 @@ function App() {
               path="order-confirmation"
               element={<OrderConfirmationPage />}
             />
+            <Route path="order-processing" element={<OrderProcessingPage />} />
             <Route path="order/:id" element={<OrderDetailsPage />} />
             <Route path="my-orders" element={<MyOrdersPage />} />
           </Route>

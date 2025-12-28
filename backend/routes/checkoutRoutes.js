@@ -74,38 +74,6 @@ router.post("/", protect, async (req, res) => {
     }
 });
 
-// @route PUT /api/checkout/:id/pay
-// @desc Update checkout to mark as paid after successful payment
-// @access Private
-// TO REMOVE
-router.put("/:id/pay", protect, async (req, res) => {
-    const { paymentStatus, paymentDetails } = req.body;
-
-    try {
-        // find checkout session by url id passed in param
-        const checkout = await Checkout.findById(req.params.id);
-
-        if (!checkout) {
-            return res.status(404).json({ message: "Checkout Not Found" });
-        }
-
-        if (paymentStatus === "paid") {
-            checkout.isPaid = true;
-            checkout.paymentStatus = paymentStatus;
-            checkout.paymentDetails = paymentDetails;
-            checkout.paidAt = Date.now();
-            await checkout.save();
-
-            res.status(200).json(checkout);
-        } else {
-            res.status(400).json({ message: "Invalid Payment Status" });
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Server Error" });
-    }
-});
-
 // @router POST /api/checkout/:id/finalize
 // @desc Finalize checkout and convert to an order after payment confirmation
 // @access Private
@@ -119,15 +87,14 @@ router.post("/:id/finalize", protect, async (req, res) => {
                 session
             );
 
-            if (checkout.user.toString() !== req.user._id.toString()) {
-                res.status(403).json({ message: "Not allowed" });
-                return;
-            }
-
             if (!checkout) {
                 return res.status(404).json({ message: "Checkout Not Found" });
             }
 
+            if (checkout.user.toString() !== req.user._id.toString()) {
+                res.status(403).json({ message: "Not allowed" });
+                return;
+            }
             if (!checkout.isPaid) {
                 res.status(400).json({ message: "Checkout is Not Paid" });
                 return;
@@ -196,6 +163,43 @@ router.post("/:id/finalize", protect, async (req, res) => {
         res.status(500).json({ message: "Server Error" });
     } finally {
         session.endSession();
+    }
+});
+
+// @router GET /api/checkout/:id
+// @desc Return minimal checkout info for polling
+// @access Private
+router.get("/:id", protect, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: "Invalid checkout id" });
+        }
+
+        const checkout = await Checkout.findById(id).select(
+            "_id user isPaid isFinalized paymentStatus paidAt finalizedAt"
+        );
+
+        if (!checkout) {
+            return res.status(404).json({ message: "Checkout Not Found" });
+        }
+
+        // ownership check (same as finalize route)
+        if (checkout.user.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: "Not allowed" });
+        }
+
+        // respond with exactly what frontend needs
+        return res.status(200).json({
+            _id: checkout._id,
+            isPaid: checkout.isPaid,
+            isFinalized: checkout.isFinalized,
+            paymentStatus: checkout.paymentStatus,
+        });
+    } catch (err) {
+        console.error("GET /api/checkout/:id error:", err);
+        return res.status(500).json({ message: "Server Error" });
     }
 });
 
