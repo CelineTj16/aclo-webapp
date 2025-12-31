@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MidtransPayButton from "./MidtransPayButton";
 import ShippingOptionsModal from "./ShippingOptionsModal";
