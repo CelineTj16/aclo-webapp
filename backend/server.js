@@ -45,8 +45,8 @@ app.use("/api/subscribe", subscribeRoutes); // prepends /api/subscribe to all th
 app.use("/api/reviews", reviewRoutes); //prepends /api/reviews to all the subscribe routes
 
 // NOT USED FOR NOW
-app.use("/api/payments/midtrans", midtransRoutes); // prepends /api/payments/midtrans for midtrans payment route
-app.use("/api/webhooks/midtrans", midtransWebhook);
+// app.use("/api/payments/midtrans", midtransRoutes); // prepends /api/payments/midtrans for midtrans payment route
+// app.use("/api/webhooks/midtrans", midtransWebhook);
 
 // Admin
 app.use("/api/admin/users", adminRoutes);
