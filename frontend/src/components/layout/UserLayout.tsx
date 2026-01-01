@@ -46,7 +46,7 @@ const UserLayout = () => {
               </p>
               <div className="mt-6 flex justify-end gap-2">
                 <button
-                  className="rounded bg-black px-4 py-2 text-white"
+                  className="rounded-lg bg-black px-4 py-2 text-white cursor-pointer"
                   onClick={() => {
                     setShowSessionExpiredModal(false);
                     navigate("/login");

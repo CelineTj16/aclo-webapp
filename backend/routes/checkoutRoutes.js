@@ -74,6 +74,43 @@ router.post("/", protect, async (req, res) => {
     }
 });
 
+// @router PUT /api/checkout/:id/payment-proof
+// @desc update proof of payment field in checkout object
+// @access Private
+router.put("/:id/payment-proof", protect, async (req, res) => {
+    try {
+        const { publicId, note } = req.body;
+
+        const checkout = await Checkout.findById(req.params.id);
+        if (!checkout) {
+            return res.status(404).json({ message: "checkout not found" });
+        }
+
+        if (checkout.user.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: "Not allowed" });
+        }
+
+        if (!checkout.paymentProof) checkout.paymentProof = {};
+        if (!publicId) {
+            checkout.paymentProof.publicId = "";
+            checkout.paymentProof.uploadedAt = undefined;
+            checkout.paymentProof.status = "none";
+        } else {
+            checkout.paymentProof.publicId = publicId;
+            checkout.paymentProof.uploadedAt = new Date();
+            checkout.paymentProof.status = "pending";
+        }
+
+        if (note) checkout.paymentProof.note = note;
+        await checkout.save();
+        return res.status(200).json(checkout);
+    } catch (err) {
+        console.error("Error updating payment proof: ", err);
+        res.status(500).json({ message: "Server Error" });
+    }
+});
+
+// TODO: CHANGE TO ONLY INVOKE THIS IN THE ADMIN ORDER MANAGEMENT PAGE
 // @router POST /api/checkout/:id/finalize
 // @desc Finalize checkout and convert to an order after payment confirmation
 // @access Private

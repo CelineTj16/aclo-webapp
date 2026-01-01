@@ -4,39 +4,55 @@ import { FaFilter } from "react-icons/fa6";
 import FilterSidebar from "../components/products/FilterSidebar";
 import SortOptions from "../components/products/SortOptions";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
-import { fetchProducts, fetchProductVariants } from "../redux/slices/productsSlice";
+import {
+  fetchProducts,
+  fetchProductVariants,
+} from "../redux/slices/productsSlice";
 import Navbar from "../components/common/Navbar";
+import LoadingOverlay from "../components/common/LoadingOverlay";
 
 const CollectionPage = () => {
+  const [loading, setLoading] = useState<boolean>(true);
+
   const dispatch = useAppDispatch();
-  // productVariants is of the form = { 
-  // "id1": [variant1, variant2], "id2": [variant1, variant2, variant3], ... 
+  // productVariants is of the form = {
+  // "id1": [variant1, variant2], "id2": [variant1, variant2, variant3], ...
   // }
-  const { products, productVariants, loading, error } = useAppSelector(
-    (state) => state.products
-  );
+  const {
+    products,
+    productVariants,
+    loading: productsLoading,
+    error,
+  } = useAppSelector((state) => state.products);
 
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
   useEffect(() => {
-      const loadData = async () => {
-          try {
-              const products = await dispatch(fetchProducts()).unwrap();
-              const ids = products.map((product) => product._id);
+    let cancelled = false;
 
-              if (ids.length > 0) {
-                  dispatch(fetchProductVariants({ productIds: ids })).unwrap();
-              }
-          } catch (error) {
-              console.error("Failed to fetch initial products:", error);
-              // Handle error if needed (e.g., show a toast notification)
-          }
-      };
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const fetchedProducts = await dispatch(fetchProducts()).unwrap();
+        const ids = fetchedProducts.map((p) => p._id);
 
-    if (!loading) {
-        loadData();
-    }
+        if (ids.length > 0) {
+          await dispatch(fetchProductVariants({ productIds: ids })).unwrap();
+        }
+      } catch (err) {
+        console.error("Failed to fetch initial products:", err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    // Run once on mount (or when you decide)
+    loadData();
+
+    return () => {
+      cancelled = true;
+    };
   }, [dispatch]);
 
   const toggleSidebar = () => {
@@ -62,6 +78,7 @@ const CollectionPage = () => {
   return (
     <div>
       <Navbar />
+      <LoadingOverlay show={loading} />
       <div className="flex flex-col lg:flex-row">
         {/* Mobile filter button */}
         <button
@@ -85,7 +102,12 @@ const CollectionPage = () => {
           {/* Sort options */}
           <SortOptions />
           {/* Product Grid */}
-          <ProductGrid products={products} productVariants={productVariants} loading={loading} error={error} />
+          <ProductGrid
+            products={products}
+            productVariants={productVariants}
+            loading={productsLoading}
+            error={error}
+          />
         </div>
       </div>
     </div>
