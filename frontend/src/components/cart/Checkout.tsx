@@ -225,36 +225,37 @@ const Checkout = () => {
           </p>
         </div>
         <div className="mt-6">
-          {!checkoutId ? (
-            <button
-              type="button"
-              onClick={handleCreateCheckout}
-              disabled={!selectedShipping}
-              className="w-full bg-black text-white py-3 rounded disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-gray-800 transition cursor-pointer"
-            >
-              Continue to Payment
-            </button>
-          ) : (
-            <div>
-              {/* <MidtransPayButton
-                checkoutId={checkoutId}
-                amount={cart.totalPrice + (selectedShipping?.price || 0)}
-                onSuccess={() => {
-                  // handleFinalizeCheckout(checkoutId);
-                  navigate(`/order-processing?checkoutId=${checkoutId}`);
+          {
+            !checkoutId && (
+              <button
+                type="button"
+                onClick={() => {
+                  handleCreateCheckout();
+                  navigate("/payment");
                 }}
-                onError={(err) => {
-                  alert("Payment failed. Try again later.");
-                  console.log(err);
-                }}
-              /> */}
-              <div className="text-2xl uppercase">Payment Instructions</div>
-              <p className="text-base text-gray-500 mt-2">
-                After payment, we will confirm your transaction and create your
-                order within 1-2 business days.
-              </p>
-            </div>
-          )}
+                disabled={!selectedShipping}
+                className="w-full bg-black text-white py-3 rounded disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-gray-800 transition cursor-pointer"
+              >
+                Continue to Payment
+              </button>
+            )
+            // : (
+            //   <div>
+            //     <MidtransPayButton
+            //       checkoutId={checkoutId}
+            //       amount={cart.totalPrice + (selectedShipping?.price || 0)}
+            //       onSuccess={() => {
+            //         // handleFinalizeCheckout(checkoutId);
+            //         navigate(`/order-processing?checkoutId=${checkoutId}`);
+            //       }}
+            //       onError={(err) => {
+            //         alert("Payment failed. Try again later.");
+            //         console.log(err);
+            //       }}
+            //     />
+            //   </div>
+            // )
+          }
         </div>
       </div>
 

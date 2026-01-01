@@ -10,6 +10,7 @@ import ProductDetails from "./components/products/ProductDetails";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import Checkout from "./components/cart/Checkout";
+import Payment from "./components/cart/Payment";
 import OrderConfirmationPage from "./pages/OrderConfirmationPage";
 import OrderDetailsPage from "./pages/OrderDetailsPage";
 import MyOrdersPage from "./pages/MyOrdersPage";
@@ -55,6 +56,7 @@ function App() {
             />
             <Route path="product/:id" element={<ProductDetails />} />
             <Route path="checkout" element={<Checkout />} />
+            <Route path="payment" element={<Payment />} />
             <Route
               path="order-confirmation"
               element={<OrderConfirmationPage />}
