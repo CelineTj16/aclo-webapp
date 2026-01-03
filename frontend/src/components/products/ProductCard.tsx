@@ -14,7 +14,7 @@ const CHECKED_KEYS = ["color", "variant"];
 const ProductCard = ({ product, variants }: ProductCardProps) => {
   const [selections, setSelections] = useState<Record<string, string>>({});
   const queryString = new URLSearchParams(selections).toString();
-  const productUrl = queryString 
+  const productUrl = queryString
     ? `/product/${product._id}?${queryString}`
     : `/product/${product._id}`;
 
@@ -60,12 +60,12 @@ const ProductCard = ({ product, variants }: ProductCardProps) => {
 
   return (
     <Link to={productUrl} className="block">
-      <div className="bg-white p-4 rounded-lg">
-        <div className="w-full h-96 mb-3">
+      <div className="bg-white p-4">
+        <div className="w-full aspect-7/8 mb-3 overflow-hidden">
           <img
             src={cloudinaryImageUrl(displayImageId)}
             alt={displayAlt}
-            className="w-full h-full object-cover rounded-lg"
+            className="w-full h-full object-cover"
           />
         </div>
       </div>
@@ -76,12 +76,8 @@ const ProductCard = ({ product, variants }: ProductCardProps) => {
         <div className="px-4 mb-3 space-y-2">
           {Object.entries(product.options).map(([key, rawValues]) => {
             const values = rawValues as string[];
-            
-            if (
-              !CHECKED_KEYS.includes(key) ||
-              !values ||
-              values.length === 0
-            ) {
+
+            if (!CHECKED_KEYS.includes(key) || !values || values.length === 0) {
               return null;
             }
 
