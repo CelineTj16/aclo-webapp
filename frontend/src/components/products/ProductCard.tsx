@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { cloudinaryImageUrl } from "../../constants/cloudinary";
 import type { Product } from "../../types/product";
 import type { ProductVariant } from "../../types/productVariant";
+import OptionSwatch from "./OptionSwatch";
 
 type ProductCardProps = {
   product: Product;
@@ -53,10 +54,17 @@ const ProductCard = ({ product, variants }: ProductCardProps) => {
     selectedVariant?.images?.[0]?.alt || product.images[0]?.alt || product.name;
 
   // determine price to display
-  let displayPrice = defaultVariant?.discountPrice ?? defaultVariant?.price;
+  let discountPrice = defaultVariant?.discountPrice ?? defaultVariant?.price;
   if (selectedVariant) {
-    displayPrice = selectedVariant.discountPrice ?? selectedVariant.price;
+    discountPrice = selectedVariant.discountPrice ?? selectedVariant.price;
   }
+
+  let originalPrice = defaultVariant?.price;
+  if (selectedVariant) {
+    originalPrice = selectedVariant.price;
+  }
+
+  const isLearningTower = product.category?.trim() === "Learning Tower";
 
   return (
     <Link to={productUrl} className="block">
@@ -69,11 +77,11 @@ const ProductCard = ({ product, variants }: ProductCardProps) => {
           />
         </div>
       </div>
-      <h3 className="text-sm px-4 mb-2">{product.name}</h3>
+      <h3 className="text-sm px-4 mb-2 text-center">{product.name}</h3>
 
-      {/* OPTION SELECTORS */}
-      {product.options && (
-        <div className="px-4 mb-3 space-y-2">
+      {/* COLOR SELECTORS */}
+      {isLearningTower && product.options && (
+        <div className="px-4 mb-3 space-y-3">
           {Object.entries(product.options).map(([key, rawValues]) => {
             const values = rawValues as string[];
 
@@ -82,27 +90,17 @@ const ProductCard = ({ product, variants }: ProductCardProps) => {
             }
 
             return (
-              <div key={key} className="text-xs">
-                <span className="text-gray-500 mb-1 block capitalize">
-                  {key}:
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  {values.map((value) => {
-                    const isSelected = selections[key] === value;
-                    return (
-                      <button
-                        key={value}
-                        onClick={(e) => handleOptionSelect(e, key, value)}
-                        className={`px-2 py-1 rounded border text-xs transition-colors ${
-                          isSelected
-                            ? "bg-black text-white border-black"
-                            : "bg-white text-gray-700 border-gray-200 hover:border-gray-400"
-                        }`}
-                      >
-                        {value}
-                      </button>
-                    );
-                  })}
+              <div key={key}>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {values.map((value) => (
+                    <OptionSwatch
+                      key={value}
+                      optionKey={key}
+                      value={value}
+                      isSelected={selections[key] === value}
+                      onSelect={handleOptionSelect}
+                    />
+                  ))}
                 </div>
               </div>
             );
@@ -110,10 +108,24 @@ const ProductCard = ({ product, variants }: ProductCardProps) => {
         </div>
       )}
 
-      <p className="text-gray-500 px-4 font-medium text-sm tracking-tighter">
-        {displayPrice
-          ? `IDR ${displayPrice.toLocaleString()}`
-          : "Price Not Found"}
+      <p className="px-4 text-center">
+        <span className="inline-flex items-center justify-center gap-2 flex-wrap">
+          {/* original price */}
+          {originalPrice && (
+            <span className="text-xs text-gray-400 line-through">
+              IDR {originalPrice.toLocaleString()}
+            </span>
+          )}
+
+          {/* discounted price */}
+          {discountPrice ? (
+            <span className="text-base font-semibold text-acloblue">
+              IDR {discountPrice.toLocaleString()}
+            </span>
+          ) : (
+            <span className="text-sm text-gray-400">Price not found</span>
+          )}
+        </span>
       </p>
     </Link>
   );
