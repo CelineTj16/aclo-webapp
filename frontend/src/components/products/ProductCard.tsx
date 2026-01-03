@@ -10,7 +10,7 @@ type ProductCardProps = {
   variants: ProductVariant[];
 };
 
-const CHECKED_KEYS = ["color", "variant"];
+const CHECKED_KEYS = ["color", "variant", "ovenMitt"];
 
 const ProductCard = ({ product, variants }: ProductCardProps) => {
   const [selections, setSelections] = useState<Record<string, string>>({});
@@ -25,6 +25,7 @@ const ProductCard = ({ product, variants }: ProductCardProps) => {
     value: string
   ) => {
     e.preventDefault(); // Stop Link navigation
+    e.stopPropagation();
     setSelections((prev) => ({
       ...prev,
       [key]: value,
@@ -65,8 +66,9 @@ const ProductCard = ({ product, variants }: ProductCardProps) => {
   }
 
   const isLearningTower = product.category?.trim() === "Learning Tower";
-  const isTalon =
-    product.name?.trim() === "TALON - Stabiliser for Learning Tower";
+  const hasVariants =
+    product.name?.trim() === "TALON - Stabiliser for Learning Tower" ||
+    product.name?.trim() === "QUILL - Premium Kid-size Mini Kitchen Utensils";
 
   return (
     <Link to={productUrl} className="block">
@@ -111,7 +113,7 @@ const ProductCard = ({ product, variants }: ProductCardProps) => {
       )}
 
       {/* VARIANT SELECTOR */}
-      {isTalon && product.options && (
+      {hasVariants && product.options && (
         <div className="px-4 mb-3 space-y-2">
           {Object.entries(product.options).map(([key, rawValues]) => {
             const values = rawValues as string[];

@@ -74,7 +74,7 @@ const products = [
         description:
             "✨ QUILL - Premium Kid-size Mini Kitchen Utensils ✨Peralatan masak sungguhan untuk little chef di rumah! Dirancang dengan ukuran mini, aman, dan ergonomis — pas di tangan anak namun tetap bisa dipakai orang dewasa. Cocok untuk mendukung kemandirian, rasa percaya diri, dan rasa ingin tahu anak sejak dini.\nSpesifikasi\nTahan panas: hingga 150°C",
         options: {
-            ovenMitt: ["Oven mitt, No oven mitt"],
+            ovenMitt: ["Oven mitt", "No oven mitt"],
         },
         images: [
             {

@@ -76,16 +76,32 @@ const productVariants = [
         ],
     },
     {
-        // Quill (utensils only)
-        sku: "QL-UT",
+        // Quill Utensils - No oven mitt
+        sku: "QL-NM",
+        price: 179000,
+        discountPrice: 103000,
+        countInStock: 200,
+        category: "Utensils",
+        ovenMitt: "No oven mitt",
+        isDefault: true,
+        images: [
+            {
+                publicId: "QUILL-NO-MITTS_s8xe2b",
+                alt: "Quill",
+            },
+        ],
+    },
+    {
+        // Quill Utensils - With oven mitt
+        sku: "QL-WM",
         price: 224000,
         discountPrice: 109000,
         countInStock: 200,
         category: "Utensils",
-        isDefault: true,
+        ovenMitt: "Oven mitt",
         images: [
             {
-                publicId: "QUILL_xvxmet",
+                publicId: "QUILL-WITH-MITTS.jpg_eu7dml",
                 alt: "Quill",
             },
         ],

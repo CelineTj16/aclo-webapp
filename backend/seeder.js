@@ -52,7 +52,7 @@ function buildAddOn(productId, options, pricing) {
     };
 }
 
-async function attachAddOns({ stork, falcon, quill, talon, quillMittens }) {
+async function attachAddOns({ stork, falcon, talon }) {
     // Use bulkWrite so this is 1 roundtrip instead of 3
     const ops = [
         {
@@ -82,21 +82,6 @@ async function attachAddOns({ stork, falcon, quill, talon, quillMittens }) {
                                 { variant: "Falcon" },
                                 { discountType: "fixed", amount: 100000 }
                             ),
-                        ],
-                    },
-                },
-            },
-        },
-        {
-            updateOne: {
-                filter: { _id: quill._id },
-                update: {
-                    $set: {
-                        addOnProducts: [
-                            buildAddOn(quillMittens._id, null, {
-                                discountType: "none",
-                                amount: 0,
-                            }),
                         ],
                     },
                 },
@@ -195,7 +180,7 @@ const seedData = async () => {
                     productId: quillMittens._id,
                 };
             }
-            if (sku === "QL-UT") {
+            if (sku.startsWith("QL-") && sku !== "QL-MT") {
                 return {
                     ...variant,
                     productId: quill._id,
