@@ -6,6 +6,7 @@ const Product = require("../models/Product");
 const ProductVariant = require("../models/ProductVariant");
 const Order = require("../models/Order");
 const { protect } = require("../middleware/authMiddleware");
+const { sendEmail } = require("../utils/emailService");
 
 const router = express.Router();
 
@@ -190,6 +191,9 @@ router.post("/:id/finalize", protect, async (req, res) => {
             );
         });
         if (res.headersSent) return;
+        if (finalOrder) {
+            sendEmail(req.user.email, `Order Confirmation #${finalOrder._id}`, `Your order has been placed successfully.`);
+        }
         res.status(201).json(finalOrder);
     } catch (error) {
         console.error(error);
