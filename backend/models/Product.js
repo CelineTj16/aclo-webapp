@@ -18,7 +18,10 @@ const productSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-
+        descriptionMd: {
+            type: String,
+            required: true,
+        },
         options: {
             // non-dynamic map
             color: {
