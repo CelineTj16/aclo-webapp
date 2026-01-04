@@ -1,30 +1,44 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
-import { useEffect, useRef } from "react";
-import { clearCart } from "../redux/slices/cartSlice";
+import { useEffect, useState } from "react";
 import { cloudinaryImageUrl } from "../constants/cloudinary";
 import { fetchOrderDetails } from "../redux/slices/orderSlice";
+import LoadingOverlay from "../components/common/LoadingOverlay";
 
 const OrderConfirmation = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { orderDetails, loading, error } = useAppSelector(
-    (state) => state.orders
-  );
+  const { orderDetails, error } = useAppSelector((state) => state.orders);
 
-  const clearedCartRef = useRef(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (!orderId) {
-      navigate("/");
-      return;
-    }
+    let cancelled = false;
 
-    // Fetch if missing OR wrong checkout currently in redux
-    if (!orderDetails?._id || orderDetails._id !== orderId) {
-      dispatch(fetchOrderDetails({ orderId }));
-    }
+    const load = async () => {
+      if (!orderId) {
+        navigate("/");
+        return;
+      }
+      setLoading(true);
+      try {
+        // Fetch if missing OR wrong checkout currently in redux
+        if (!orderDetails?._id || orderDetails._id !== orderId) {
+          await dispatch(fetchOrderDetails({ orderId })).unwrap();
+        }
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) navigate("/my-orders");
+        return;
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, [orderId, orderDetails?._id, dispatch, navigate]);
 
   // clear the cart when order is confirmed
@@ -34,13 +48,7 @@ const OrderConfirmation = () => {
     if (loading) return;
 
     if (!orderDetails || orderDetails._id !== orderId) {
-      navigate("/my-orders");
       return;
-    }
-
-    if (!clearedCartRef.current) {
-      dispatch(clearCart());
-      clearedCartRef.current = true;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId, orderDetails?._id, loading, dispatch, navigate]);
@@ -51,7 +59,7 @@ const OrderConfirmation = () => {
     return orderDate.toLocaleDateString();
   };
 
-  if (loading) return <p>Loading order...</p>;
+  if (loading) return <LoadingOverlay show />;
   if (error) return <p>Error: {error}</p>;
 
   if (!orderDetails || orderDetails._id !== orderId) return null;
@@ -111,6 +119,11 @@ const OrderConfirmation = () => {
               </div>
             </div>
           ))}
+        </div>
+        <div className="mb-6">
+          Your order has been placed and is pending payment verification. We'll
+          notify you once it's approved and when your tracking number is
+          available.
         </div>
         {/* Payment and Delivery Info */}
         <div className="grid grid-cols-2 gap-8">

@@ -6,6 +6,7 @@ import { API_URL, getAuthHeader } from "../../constants/api";
 import LoadingOverlay from "../common/LoadingOverlay";
 import { cloudinaryImageUrl } from "../../constants/cloudinary";
 import { fetchCheckoutById } from "../../redux/slices/checkoutSlice";
+import { clearCart } from "../../redux/slices/cartSlice";
 
 const REDIRECT_AFTER_MS = 2000;
 
@@ -122,7 +123,7 @@ const Payment = () => {
         { publicId: screenshot, note: note }, // optional: send proof id to backend
         { headers: getAuthHeader() }
       );
-
+      dispatch(clearCart());
       navigate(`/order/${data._id}/confirmation`);
     } catch (err) {
       console.error(err);
