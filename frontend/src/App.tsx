@@ -10,7 +10,8 @@ import ProductDetails from "./components/products/ProductDetails";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import Checkout from "./components/cart/Checkout";
-import OrderConfirmationPage from "./pages/OrderConfirmationPage";
+import Payment from "./components/cart/Payment";
+import OrderConfirmation from "./pages/OrderConfirmation";
 import OrderDetailsPage from "./pages/OrderDetailsPage";
 import MyOrdersPage from "./pages/MyOrdersPage";
 import AdminLayout from "./components/admin/AdminLayout";
@@ -50,10 +51,11 @@ function App() {
             {/* anything after a colon is a dynamic route */}
             <Route path="shop" element={<ShopPage />} />
             <Route path="product/:id" element={<ProductDetails />} />
-            <Route path="checkout" element={<Checkout />} />
+            <Route path="checkout/:cartId" element={<Checkout />} />
+            <Route path="payment/:checkoutId" element={<Payment />} />
             <Route
-              path="order-confirmation"
-              element={<OrderConfirmationPage />}
+              path="order/:orderId/confirmation"
+              element={<OrderConfirmation />}
             />
             <Route path="order/:id" element={<OrderDetailsPage />} />
             <Route path="my-orders" element={<MyOrdersPage />} />

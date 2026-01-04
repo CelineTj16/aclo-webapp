@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import ProductGrid from "../components/products/ProductGrid";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import {
@@ -6,29 +6,41 @@ import {
   fetchProductVariants,
 } from "../redux/slices/productsSlice";
 import Navbar from "../components/common/Navbar";
+import LoadingOverlay from "../components/common/LoadingOverlay";
 
 const CollectionPage = () => {
+  const [loading, setLoading] = useState<boolean>(true);
   const dispatch = useAppDispatch();
 
-  const { products, productVariants, loading, error } = useAppSelector(
-    (state) => state.products
-  );
+  const {
+    products,
+    productVariants,
+    loading: productsLoading,
+    error,
+  } = useAppSelector((state) => state.products);
 
   useEffect(() => {
+    let cancelled = false;
     const loadData = async () => {
+      setLoading(true);
       try {
         const products = await dispatch(fetchProducts()).unwrap();
         const ids = products.map((product) => product._id);
 
         if (ids.length > 0) {
-          dispatch(fetchProductVariants({ productIds: ids })).unwrap();
+          await dispatch(fetchProductVariants({ productIds: ids })).unwrap();
         }
       } catch (error) {
         console.error("Failed to fetch initial products:", error);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     };
 
-    if (!loading) loadData();
+    loadData();
+    return () => {
+      cancelled = true;
+    };
   }, [dispatch]);
 
   const towers = products.filter((p) => p.category === "Learning Tower");
@@ -40,7 +52,7 @@ const CollectionPage = () => {
   return (
     <div>
       <Navbar />
-
+      <LoadingOverlay show={loading} />
       <div className="flex flex-col lg:flex-row">
         <div className="grow p-4 px-10">
           <h2 className="text-4xl mb-8 text-center text-acloblue">
@@ -53,17 +65,17 @@ const CollectionPage = () => {
           <ProductGrid
             products={towers}
             productVariants={productVariants}
-            loading={loading}
+            loading={productsLoading}
             error={error}
           />
 
           <p className="text-2xl mt-12 text-ink font-extralight p-4">
-            Kids’ kitchen tools & accessories
+            Kids' kitchen tools & accessories
           </p>
           <ProductGrid
             products={others}
             productVariants={productVariants}
-            loading={loading}
+            loading={productsLoading}
             error={error}
           />
         </div>

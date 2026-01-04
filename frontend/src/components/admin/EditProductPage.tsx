@@ -48,12 +48,9 @@ const EditProductPage = () => {
   const navigate = useNavigate();
   const { id, variantId } = useParams();
 
-  const {
-    selectedProduct,
-    productVariants,
-    loading,
-    error,
-  } = useAppSelector((state) => state.products);
+  const { selectedProduct, productVariants, loading, error } = useAppSelector(
+    (state) => state.products
+  );
 
   const [productData, setProductData] = useState<ProductData>({
     name: "",
