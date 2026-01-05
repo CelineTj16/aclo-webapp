@@ -6,10 +6,12 @@ const User = require("./models/User");
 const Cart = require("./models/Cart");
 const Order = require("./models/Order");
 const Review = require("./models/Review");
+const Checkout = require("./models/Checkout");
 const products = require("./data/products");
 const productVariants = require("./data/productVariants");
 const reviews = require("./data/reviews");
 const orders = require("./data/orders");
+const checkouts = require("./data/checkouts");
 
 dotenv.config();
 
@@ -21,6 +23,7 @@ async function connectDB() {
 
 async function clearCollections() {
     await Promise.all([
+        Checkout.deleteMany(),
         Product.deleteMany(),
         ProductVariant.deleteMany(),
         User.deleteMany(),
@@ -44,88 +47,54 @@ function findByContains(allProducts, keyword) {
     return allProducts.find((p) => p.name?.toLowerCase().includes(k));
 }
 
-function buildAddOn(productId, options, pricing) {
+function getVariantAndProduct(insertedProducts, insertedVariants, keyword) {
+    const product = insertedProducts.find((p) =>
+        p.name?.toLowerCase().includes(keyword.toLowerCase())
+    );
+    if (!product) throw new Error(`Product not found for keyword: ${keyword}`);
+
+    const variant = insertedVariants.find(
+        (pv) => pv.productId.toString() === product._id.toString()
+    );
+    if (!variant)
+        throw new Error(`Variant not found for product: ${product.name}`);
+
+    return { product, variant };
+}
+
+function injectCheckoutItemIds(checkoutTemplate, { product, variant }) {
+    // overwrite the first checkoutItems entry (or build new array if you want)
+    const firstItem = checkoutTemplate.checkoutItems?.[0] ?? {};
+
     return {
-        productId,
-        ...(options ? { options } : {}),
-        pricing: pricing ?? { discountType: "none", amount: 0 },
+        ...checkoutTemplate,
+        checkoutItems: [
+            {
+                ...firstItem,
+                productId: product._id,
+                productVariantId: variant._id,
+            },
+        ],
     };
 }
 
-async function attachAddOns({ stork, falcon, talon }) {
-    // Use bulkWrite so this is 1 roundtrip instead of 3
-    const ops = [
-        {
-            updateOne: {
-                filter: { _id: stork._id },
-                update: {
-                    $set: {
-                        addOnProducts: [
-                            buildAddOn(
-                                talon._id,
-                                { variant: "Stork" },
-                                { discountType: "fixed", amount: 100000 }
-                            ),
-                        ],
-                    },
-                },
-            },
-        },
-        {
-            updateOne: {
-                filter: { _id: falcon._id },
-                update: {
-                    $set: {
-                        addOnProducts: [
-                            buildAddOn(
-                                talon._id,
-                                { variant: "Falcon" },
-                                { discountType: "fixed", amount: 100000 }
-                            ),
-                        ],
-                    },
-                },
-            },
-        },
-    ];
+function buildOrderFromCheckout(orderTemplate, createdCheckout) {
+    return {
+        ...orderTemplate,
+        checkout: createdCheckout._id,
 
-    await Product.bulkWrite(ops);
+        orderItems: createdCheckout.checkoutItems.map((item) => ({
+            productId: item.productId,
+            productVariantId: item.productVariantId,
+            name: item.name,
+            image: item.image,
+            price: item.price,
+            options: item.options,
+            quantity: item.quantity,
+            weight: 0,
+        })),
+    };
 }
-
-// function buildSampleOrders({ insertedProducts, insertedVariants, userId }) {
-//     const p0 = insertedProducts[0];
-//     if (!p0)
-//         throw new Error("No products inserted; cannot build sample orders.");
-
-//     const p0Variant = insertedVariants.find(
-//         (pv) => pv.productId.toString() === p0._id.toString()
-//     );
-
-//     if (!p0Variant) {
-//         throw new Error(
-//             `No variant found for first product (${p0.name}). Check your variant mappings.`
-//         );
-//     }
-
-//     return orders.map((order) => ({
-//         ...order,
-//         user: userId,
-//         orderItems: [
-//             {
-//                 productId: p0._id,
-//                 productVariantId: p0Variant._id,
-//                 name: p0.name,
-//                 image:
-//                     p0Variant.images?.[0]?.publicId ||
-//                     p0Variant.images?.[0]?.alt ||
-//                     "",
-//                 price: p0Variant.discountPrice ?? p0Variant.price,
-//                 weight: p0.weight || 0,
-//                 quantity: 1,
-//             },
-//         ],
-//     }));
-// }
 
 // SEEDER
 const seedData = async () => {
@@ -165,11 +134,6 @@ const seedData = async () => {
                 "One or more products not found by name. Check your seed product names exactly."
             );
         }
-
-        // Inject addOnProducts into STORK and FALCON with TALON add-on
-        // Inject addOnProducts into QUILL with Oven mitten add-on
-        // With: Correct variant option & bundle pricing discount
-        await attachAddOns({ stork, falcon, quill, talon, quillMittens });
 
         // Insert productId mappings for all Product Variants
         const variantsWithProductId = productVariants.map((variant) => {
@@ -223,17 +187,34 @@ const seedData = async () => {
             variantsWithProductId
         );
 
-        // Retrieve the first product & it's variant and create a sample Order with it
-        // const sampleOrders = buildSampleOrders({
-        //     insertedProducts,
-        //     insertedVariants,
-        //     userId,
-        // });
+        const checkoutTemp = checkouts[0];
+        const orderTemp = orders[0];
+        if (!checkoutTemp)
+            throw new Error("No checkout template found in data/checkouts.js");
+        if (!orderTemp)
+            throw new Error("No order template found in data/orders.js");
 
-        // Insert add on products for the right products
+        const { product: sparrowProduct, variant: sparrowVariant } =
+            getVariantAndProduct(insertedProducts, insertedVariants, "sparrow");
+
+        const checkoutPayload = injectCheckoutItemIds(checkoutTemp, {
+            product: sparrowProduct,
+            variant: sparrowVariant,
+        });
+
+        const createdCheckout = await Checkout.create({
+            ...checkoutPayload,
+            user: userId, // inject user
+        });
+
+        const orderPayload = buildOrderFromCheckout(orderTemp, createdCheckout);
+
+        await Order.create({
+            ...orderPayload,
+            user: userId, // inject user
+        });
 
         await Review.insertMany(reviews);
-        // await Order.insertMany(sampleOrders);
 
         console.log("Mock data seeded successfully");
         process.exit();

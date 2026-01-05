@@ -1,28 +1,32 @@
 const orders = [
     {
-        shippingCost: 9000,
-        shippingDuration: "2 days",
-        shippingCourier: "tiki",
-        shippingMethod: "Reguler",
+        orderItems: [],
+
         shippingDetails: {
             name: "Admin User",
-            address: "123 Admin Street",
+            address: "Admin Street 123",
             city: "Jakarta",
-            postalCode: "10310",
-            phone: "123456789012",
+            postalCode: "11234",
+            phone: "1234567890",
         },
-        paymentMethod: "BankTransfer",
-        totalPrice: 118000,
-        isPaid: false,
-        isDelivered: false,
 
-        status: "processing",
+        shippingCost: 22500,
+        shippingMethod: "Same Day",
+        shippingCourier: "anteraja",
+        shippingDuration: "8 - 12 hours",
+
+        paymentMethod: "BankTransfer",
         paymentProof: {
-            publicId: "aclo/dev/payments/cpyhnyf5wkirbywngjpl",
+            publicId: "aclo/dev/payments/baskdpzqrt7gpqzzr5wm",
             uploadedAt: new Date(),
-            status: "accepted",
+            status: "pending",
             note: "",
         },
+
+        totalPrice: 621500,
+        isPaid: false,
+
+        status: "pending",
     },
 ];
 
