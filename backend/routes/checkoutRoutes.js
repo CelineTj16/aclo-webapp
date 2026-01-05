@@ -6,6 +6,7 @@ const Product = require("../models/Product");
 const ProductVariant = require("../models/ProductVariant");
 const Order = require("../models/Order");
 const { protect } = require("../middleware/authMiddleware");
+const { sendEmail } = require("../utils/emailService");
 
 const router = express.Router();
 
@@ -147,7 +148,9 @@ router.post("/:id/submit-proof", protect, async (req, res) => {
                 session
             );
         });
-
+        if (createdOrder) {
+            sendEmail(req.user.email, `Order Confirmation #${createdOrder._id}`, `Your order has been placed successfully.`);
+        }
         if (res.headersSent) return;
         return res.status(200).json(createdOrder);
     } catch (err) {

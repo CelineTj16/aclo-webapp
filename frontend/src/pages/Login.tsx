@@ -7,6 +7,7 @@ import { mergeCart } from "../redux/slices/cartSlice";
 import { assets, cloudinaryImageUrl } from "../constants/cloudinary";
 import Navbar from "../components/common/Navbar";
 import { ChevronLeftIcon } from "@heroicons/react/24/solid";
+import axios from "axios";
 
 const Login = () => {
   const [formData, setFormData] = useState<LoginPayload>({
@@ -41,6 +42,16 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleTestEmail = async () => {
+    try {
+      await axios.get("http://localhost:9000/api/test-email");
+      alert("Email sent! Check your inbox.");
+    } catch (error) {
+      console.error(error);
+      alert("Failed to send email");
+    }
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -103,6 +114,13 @@ const Login = () => {
               className="w-full bg-acloblue text-white p-2 rounded-lg font-semibold mt-2 hover:opacity-80 transition"
             >
               {loading ? "Loading..." : "Log In"}
+            </button>
+            <button
+              type="button"
+              onClick={handleTestEmail}
+              className="w-full bg-green-600 text-white p-2 rounded-lg font-semibold mt-4 hover:opacity-80 transition"
+            >
+              Test Email Function
             </button>
             <p className="mt-6 text-center text-sm text-gray-500">
               Don't have an account?{" "}
