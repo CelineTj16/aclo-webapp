@@ -92,40 +92,40 @@ async function attachAddOns({ stork, falcon, talon }) {
     await Product.bulkWrite(ops);
 }
 
-function buildSampleOrders({ insertedProducts, insertedVariants, userId }) {
-    const p0 = insertedProducts[0];
-    if (!p0)
-        throw new Error("No products inserted; cannot build sample orders.");
+// function buildSampleOrders({ insertedProducts, insertedVariants, userId }) {
+//     const p0 = insertedProducts[0];
+//     if (!p0)
+//         throw new Error("No products inserted; cannot build sample orders.");
 
-    const p0Variant = insertedVariants.find(
-        (pv) => pv.productId.toString() === p0._id.toString()
-    );
+//     const p0Variant = insertedVariants.find(
+//         (pv) => pv.productId.toString() === p0._id.toString()
+//     );
 
-    if (!p0Variant) {
-        throw new Error(
-            `No variant found for first product (${p0.name}). Check your variant mappings.`
-        );
-    }
+//     if (!p0Variant) {
+//         throw new Error(
+//             `No variant found for first product (${p0.name}). Check your variant mappings.`
+//         );
+//     }
 
-    return orders.map((order) => ({
-        ...order,
-        user: userId,
-        orderItems: [
-            {
-                productId: p0._id,
-                productVariantId: p0Variant._id,
-                name: p0.name,
-                image:
-                    p0Variant.images?.[0]?.publicId ||
-                    p0Variant.images?.[0]?.alt ||
-                    "",
-                price: p0Variant.discountPrice ?? p0Variant.price,
-                weight: p0.weight || 0,
-                quantity: 1,
-            },
-        ],
-    }));
-}
+//     return orders.map((order) => ({
+//         ...order,
+//         user: userId,
+//         orderItems: [
+//             {
+//                 productId: p0._id,
+//                 productVariantId: p0Variant._id,
+//                 name: p0.name,
+//                 image:
+//                     p0Variant.images?.[0]?.publicId ||
+//                     p0Variant.images?.[0]?.alt ||
+//                     "",
+//                 price: p0Variant.discountPrice ?? p0Variant.price,
+//                 weight: p0.weight || 0,
+//                 quantity: 1,
+//             },
+//         ],
+//     }));
+// }
 
 // SEEDER
 const seedData = async () => {
@@ -224,16 +224,16 @@ const seedData = async () => {
         );
 
         // Retrieve the first product & it's variant and create a sample Order with it
-        const sampleOrders = buildSampleOrders({
-            insertedProducts,
-            insertedVariants,
-            userId,
-        });
+        // const sampleOrders = buildSampleOrders({
+        //     insertedProducts,
+        //     insertedVariants,
+        //     userId,
+        // });
 
         // Insert add on products for the right products
 
         await Review.insertMany(reviews);
-        await Order.insertMany(sampleOrders);
+        // await Order.insertMany(sampleOrders);
 
         console.log("Mock data seeded successfully");
         process.exit();

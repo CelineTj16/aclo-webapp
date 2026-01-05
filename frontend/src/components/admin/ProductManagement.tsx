@@ -1,10 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { useEffect } from "react";
+import { deleteProduct } from "../../redux/slices/adminProductSlice";
 import {
-  deleteProduct,
-} from "../../redux/slices/adminProductSlice";
-import { fetchProducts, fetchProductVariants } from "../../redux/slices/productsSlice";
+  fetchProducts,
+  fetchProductVariants,
+} from "../../redux/slices/productsSlice";
 import { cloudinaryImageUrl } from "../../constants/cloudinary";
 
 const ProductManagement = () => {
@@ -21,21 +22,22 @@ const ProductManagement = () => {
       return;
     }
     const loadData = async () => {
-        if (products.length > 0 && Object.keys(productVariants).length > 0) return;
-        try {
-            const products = await dispatch(fetchProducts()).unwrap();
-            const ids = products.map((p) => p._id);
+      if (products.length > 0 && Object.keys(productVariants).length > 0)
+        return;
+      try {
+        const products = await dispatch(fetchProducts()).unwrap();
+        const ids = products.map((p) => p._id);
 
-            if (ids.length > 0) {
-               await dispatch(fetchProductVariants({ productIds: ids })).unwrap();
-            }
-        } catch (err) {
-            console.error("Failed to load products: ", err);
+        if (ids.length > 0) {
+          await dispatch(fetchProductVariants({ productIds: ids })).unwrap();
         }
+      } catch (err) {
+        console.error("Failed to load products: ", err);
+      }
     };
 
     if (!loading) {
-        loadData();
+      loadData();
     }
   }, [dispatch, user, navigate, products, loading, productVariants, error]);
 

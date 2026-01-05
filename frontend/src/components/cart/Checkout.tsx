@@ -1,34 +1,32 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import MidtransPayButton from "./MidtransPayButton";
+import { useNavigate, useParams } from "react-router-dom";
+// import MidtransPayButton from "./MidtransPayButton";
 import ShippingOptionsModal from "./ShippingOptionsModal";
 import ShippingDetailsModal from "./ShippingDetailsModal";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { 
-  createCheckout, 
+import {
+  createCheckout,
   calculateShippingCost,
   setSelectedShipping,
-  clearShipping
+  clearShipping,
 } from "../../redux/slices/checkoutSlice";
-import { API_URL, getAuthHeader } from "../../constants/api";
-import axios from "axios";
 import type { Checkout, ShippingDetails } from "../../types/checkout";
 import { cloudinaryImageUrl } from "../../constants/cloudinary";
+import { fetchCartById } from "../../redux/slices/cartSlice";
 
 const Checkout = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { cart, loading, error } = useAppSelector((state) => state.cart);
+  const { cartId } = useParams<{ cartId: string }>();
   const { user } = useAppSelector((state) => state.auth);
-  const { 
-    shippingOptions, 
-    selectedShipping, 
-    shippingLoading, 
-  } = useAppSelector((state) => state.checkout);
+  const { shippingOptions, selectedShipping, shippingLoading } = useAppSelector(
+    (state) => state.checkout
+  );
 
-  const [checkoutId, setCheckoutId] = useState<string | null>(null);
   const [showShippingModal, setShowShippingModal] = useState(false);
-  const [showShippingDetailsModal, setShowShippingDetailsModal] = useState(true);
+  const [showShippingDetailsModal, setShowShippingDetailsModal] =
+    useState(true);
   const [shippingDetails, setShippingDetails] = useState<ShippingDetails>({
     name: "",
     address: "",
@@ -37,12 +35,22 @@ const Checkout = () => {
     phone: "",
   });
 
-  // Ensure cart is loaded before proceeding
   useEffect(() => {
-    if (!cart || !cart.products || cart.products.length === 0) {
+    if (!cartId) {
+      navigate("/");
+      return;
+    }
+
+    if (!cart?._id || cart._id !== cartId) {
+      dispatch(fetchCartById({ cartId }));
+      return;
+    }
+
+    if (!loading && (!cart.products || cart.products.length === 0)) {
       navigate("/");
     }
-  }, [cart, navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartId, cart?._id, cart?.products?.length, loading, dispatch, navigate]);
 
   // Clear shipping when component unmounts
   useEffect(() => {
@@ -51,7 +59,9 @@ const Checkout = () => {
     };
   }, [dispatch]);
 
-  const handleShippingDetailsSubmit = async (shippingDetails: ShippingDetails) => {
+  const handleShippingDetailsSubmit = async (
+    shippingDetails: ShippingDetails
+  ) => {
     setShippingDetails(shippingDetails);
 
     if (!cart || !cart.products || cart.products.length === 0) {
@@ -88,7 +98,7 @@ const Checkout = () => {
 
     try {
       const totalWithShipping = cart.totalPrice + selectedShipping.price;
-      
+
       const createdCheckout: Checkout = await dispatch(
         createCheckout({
           checkoutItems: cart.products.map((p) => ({
@@ -96,7 +106,7 @@ const Checkout = () => {
             options: p.options ?? {},
           })),
           shippingDetails,
-          paymentMethod: "Midtrans",
+          paymentMethod: "BankTransfer",
           totalPrice: totalWithShipping,
           shippingCost: selectedShipping.price,
           shippingMethod: selectedShipping.courierServiceName,
@@ -105,48 +115,9 @@ const Checkout = () => {
         })
       ).unwrap();
 
-      if (createdCheckout._id) {
-        setCheckoutId(createdCheckout._id);
-      }
+      return createdCheckout._id ?? null;
     } catch (error) {
       console.error("Failed to create checkout: ", error);
-    }
-  };
-
-  // const handlePaymentSuccess = async (details: Record<string, unknown>) => {
-  //   if (!checkoutId) {
-  //     console.error("No checkoutId available for payment update.");
-  //     return;
-  //   }
-  //   try {
-  //     await axios.put(
-  //       `${API_URL}/api/checkout/${checkoutId}/pay`,
-  //       {
-  //         paymentStatus: "paid",
-  //         paymentDetails: details,
-  //       },
-  //       {
-  //         headers: getAuthHeader(),
-  //       }
-  //     );
-  //     await handleFinalizeCheckout(checkoutId); // finalize checkout if payment is successful
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
-
-  const handleFinalizeCheckout = async (checkoutId: string) => {
-    try {
-      await axios.post(
-        `${API_URL}/api/checkout/${checkoutId}/finalize`,
-        {},
-        { headers: getAuthHeader() }
-      );
-      navigate("/order-confirmation");
-    } catch (error: any) {
-      const msg = error?.response?.data?.message || "Finalize failed";
-      alert(msg);
-      console.error("Error in handleFinalizeCheckout:", error);
     }
   };
 
@@ -249,9 +220,7 @@ const Checkout = () => {
                 </button>
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">
-                N/A
-              </p>
+              <p className="text-gray-500 text-sm">N/A</p>
             )}
           </div>
         </div>
@@ -265,34 +234,17 @@ const Checkout = () => {
           </p>
         </div>
         <div className="mt-6">
-          {!checkoutId ? (
-            <button
-              type="button"
-              onClick={handleCreateCheckout}
-              disabled={!selectedShipping}
-              className="w-full bg-black text-white py-3 rounded disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-gray-800 transition"
-            >
-              Continue to Payment
-            </button>
-          ) : (
-            <div>
-              <MidtransPayButton
-                checkoutId={checkoutId}
-                amount={cart.totalPrice + (selectedShipping?.price || 0)}
-                onSuccess={() => {
-                  handleFinalizeCheckout(checkoutId);
-                }}
-                onError={(err) => {
-                  alert("Payment failed. Try again later.");
-                  console.log(err);
-                }}
-              />
-              <p className="text-sm text-gray-500 mt-2">
-                After payment, we will confirm your transaction and create
-                your order.
-              </p>
-            </div>
-          )}
+          <button
+            type="button"
+            onClick={async () => {
+              const id = await handleCreateCheckout(); // return checkout
+              if (id) navigate(`/payment/${id}`);
+            }}
+            disabled={!selectedShipping}
+            className="w-full bg-black text-white py-3 rounded disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-gray-800 transition cursor-pointer"
+          >
+            Continue to Payment
+          </button>
         </div>
       </div>
 

@@ -131,7 +131,7 @@ const ProductCard = ({ product, variants }: ProductCardProps) => {
                       <button
                         key={value}
                         onClick={(e) => handleOptionSelect(e, key, value)}
-                        className={`px-2 py-1 rounded border text-xs transition-colors ${
+                        className={`px-2 py-1 rounded border text-xs transition-colors cursor-pointer ${
                           isSelected
                             ? "bg-acloblue text-white border-acloblue"
                             : "bg-white text-acloblue-700 border-acloblue-200 hover:border-acloblue-400"

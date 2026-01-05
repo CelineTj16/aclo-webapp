@@ -16,22 +16,29 @@ export interface ShippingDetails {
   phone: string;
 }
 
+export interface PaymentProof {
+  publicId: string;
+  uploadedAt: string;
+  status: "none" | "pending" | "approved" | "rejected";
+  note: string;
+}
+
 export interface Checkout {
   _id: string;
   user: string; // userId
   checkoutItems: CheckoutItem[];
   shippingDetails: ShippingDetails;
   paymentMethod: string;
+  paymentProof?: PaymentProof;
   totalPrice: number;
-  isPaid: boolean;
+  isPaid: boolean; // keep this field but will alw stay false until midtrans implemented
   paidAt?: string;
-  paymentStatus: string;
-  paymentDetails?: Record<string, any>;
+  paymentDetails?: Record<string, any>; // use this only when using midtrans
   shippingCost?: number;
   shippingMethod?: string;
   shippingCourier?: string;
   shippingDuration?: string;
-  isFinalized: boolean;
+  isFinalized: boolean; // switch to true when user is done placing order
   finalizedAt?: string;
   createdAt: string;
   updatedAt: string;
