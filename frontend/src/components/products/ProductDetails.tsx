@@ -84,12 +84,16 @@ const ProductDetails = () => {
 
     const color = searchParams.get("color") || undefined;
     const variant = searchParams.get("variant") || undefined;
+    const ovenMitt = searchParams.get("ovenMitt") || undefined;
+
+    console.log("fetchProductVariant params:", { color, variant, ovenMitt });
 
     dispatch(
       fetchProductVariant({
         productId: id,
         color,
         variant,
+        ovenMitt,
       })
     );
   }, [dispatch, id, searchParams]);
