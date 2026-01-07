@@ -1,28 +1,55 @@
-import { useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { fetchOrderDetails } from "../redux/slices/orderSlice";
 import { cloudinaryImageUrl } from "../constants/cloudinary";
 import { getStatusBadge } from "../constants/orderStatus";
 import Navbar from "../components/common/Navbar";
+import LoadingOverlay from "../components/common/LoadingOverlay";
 
 const OrderDetailsPage = () => {
+  const [loading, setLoading] = useState<boolean>(true);
+  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const dispatch = useAppDispatch();
-  const { orderDetails, loading, error } = useAppSelector(
-    (state) => state.orders
-  );
+  const { orderDetails, error } = useAppSelector((state) => state.orders);
 
   useEffect(() => {
-    if (!id) return;
-    dispatch(fetchOrderDetails({ orderId: id }));
-  }, [dispatch, id]);
+    let cancelled = false;
 
-  if (loading) return <p>Loading...</p>;
+    const load = async () => {
+      if (!id) {
+        navigate("/my-orders");
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        // fetch if missing OR wrong order currently in redux
+        if (!orderDetails?._id || orderDetails._id !== id) {
+          await dispatch(fetchOrderDetails({ orderId: id })).unwrap();
+        }
+      } catch (err) {
+        console.error("Failed to fetch order details:", err);
+        if (!cancelled) navigate("/my-orders");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch, id, orderDetails?._id, navigate]);
+
   if (error) return <p>Error: {error}</p>;
   return (
     <div>
       <Navbar />
+      <LoadingOverlay show={loading} />
       <div className="max-w-7xl mx-auto p-4 sm:p-6">
         <h2 className="text-2xl md:text-3xl font-bold mb-6">Order Details</h2>
         {!orderDetails ? (

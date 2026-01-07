@@ -8,7 +8,7 @@ import {
 import Navbar from "../components/common/Navbar";
 import LoadingOverlay from "../components/common/LoadingOverlay";
 
-const CollectionPage = () => {
+const ShopPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const dispatch = useAppDispatch();
 
@@ -84,4 +84,4 @@ const CollectionPage = () => {
   );
 };
 
-export default CollectionPage;
+export default ShopPage;

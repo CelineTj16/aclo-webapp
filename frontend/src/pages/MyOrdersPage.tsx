@@ -1,29 +1,48 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { fetchUserOrders } from "../redux/slices/orderSlice";
 import { cloudinaryImageUrl } from "../constants/cloudinary";
 import { getStatusBadge } from "../constants/orderStatus";
 import Navbar from "../components/common/Navbar";
+import LoadingOverlay from "../components/common/LoadingOverlay";
 
 const MyOrdersPage = () => {
+  const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { orders, loading, error } = useAppSelector((state) => state.orders);
+  const { orders, error } = useAppSelector((state) => state.orders);
 
   useEffect(() => {
-    dispatch(fetchUserOrders());
+    let cancelled = false;
+
+    const load = async () => {
+      setLoading(true);
+      try {
+        await dispatch(fetchUserOrders()).unwrap();
+      } catch (err) {
+        console.error("Failed to fetch user orders:", err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
   }, [dispatch]);
 
   const handleRowClick = (orderId: string) => {
     navigate(`/order/${orderId}`);
   };
-  if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
 
   return (
     <div>
       <Navbar />
+      <LoadingOverlay show={loading} />
       <div className="max-w-7xl mx-auto p-4 sm:p-6">
         <h2 className="text-xl sm:text-2xl font-bold mb-6">My Orders</h2>
         <div className="relative shadow-md sm:rounded-lg overflow-hidden">
