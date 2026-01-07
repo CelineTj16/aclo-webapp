@@ -15,8 +15,10 @@ import {
 } from "../../redux/slices/productsSlice";
 import { addToCart } from "../../redux/slices/cartSlice";
 import { cloudinaryImageUrl } from "../../constants/cloudinary";
+import type { Product, ProductImage } from "../../types/product";
 
 const ProductDetails = () => {
+  const [loading, setLoading] = useState<boolean>(true);
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useAppDispatch();
@@ -24,7 +26,7 @@ const ProductDetails = () => {
   const {
     selectedProduct,
     selectedVariant,
-    loading,
+    loading: productsLoading,
     error,
     similarProducts,
     similarProductVariants,
@@ -55,10 +57,14 @@ const ProductDetails = () => {
 
     if (!hasUserSelectedOption) return productImgs;
 
-    const variantIds = new Set(variantImgs.map((img: any) => img.publicId));
+    const variantIds = new Set(
+      variantImgs.map((img: ProductImage) => img.publicId)
+    );
     const merged = [
       ...variantImgs,
-      ...productImgs.filter((img: any) => !variantIds.has(img.publicId)),
+      ...productImgs.filter(
+        (img: ProductImage) => !variantIds.has(img.publicId)
+      ),
     ];
 
     return merged.length ? merged : productImgs;
@@ -72,52 +78,57 @@ const ProductDetails = () => {
     if (!blockedProductFirstId) return displayedImages;
 
     const filtered = displayedImages.filter(
-      (img: any) => img.publicId !== blockedProductFirstId
+      (img: ProductImage) => img.publicId !== blockedProductFirstId
     );
 
     return filtered.length ? filtered : displayedImages;
   }, [displayedImages, blockedProductFirstId]);
 
   useEffect(() => {
-    if (!id) return;
+    let cancelled = false;
+    const load = async () => {
+      if (!id) return;
 
-    dispatch(fetchProductDetails({ id }));
+      setLoading(true);
+      try {
+        // curr product details
+        await dispatch(fetchProductDetails({ id })).unwrap();
 
-    dispatch(fetchSimilarProducts({ id }))
-      .unwrap()
-      .then((returnedSimilarProducts) => {
-        if (returnedSimilarProducts?.length > 0) {
-          const productIds = returnedSimilarProducts.map((p: any) => p._id);
-          dispatch(fetchSimilarProductVariants({ productIds }));
+        // product variant (based on URL params)
+        const color = searchParams.get("color") || undefined;
+        const variant = searchParams.get("variant") || undefined;
+        const ovenMitt = searchParams.get("ovenMitt") || undefined;
+        const stabiliser = searchParams.get("stabiliser") || undefined;
+
+        await dispatch(
+          fetchProductVariant({
+            productId: id,
+            color,
+            variant,
+            ovenMitt,
+            stabiliser,
+          })
+        ).unwrap();
+
+        // similar products
+        const similarProds = await dispatch(
+          fetchSimilarProducts({ id })
+        ).unwrap();
+        const productIds = (similarProds ?? []).map((p: Product) => p._id);
+
+        if (productIds.length > 0) {
+          await dispatch(fetchSimilarProductVariants({ productIds })).unwrap();
         }
-      })
-      .catch((err) => console.error("Failed to load similar products:", err));
-  }, [dispatch, id]);
-
-  useEffect(() => {
-    if (!id) return;
-
-    const color = searchParams.get("color") || undefined;
-    const variant = searchParams.get("variant") || undefined;
-    const ovenMitt = searchParams.get("ovenMitt") || undefined;
-    const stabiliser = searchParams.get("stabiliser") || undefined;
-
-    console.log("fetchProductVariant params:", {
-      color,
-      variant,
-      ovenMitt,
-      stabiliser,
-    });
-
-    dispatch(
-      fetchProductVariant({
-        productId: id,
-        color,
-        variant,
-        ovenMitt,
-        stabiliser,
-      })
-    );
+      } catch (err) {
+        console.error("ProductDetails load failed: ", err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
   }, [dispatch, id, searchParams]);
 
   const lastVariantIdRef = useRef<string | null>(null);
@@ -131,7 +142,7 @@ const ProductDetails = () => {
       lastVariantIdRef.current = null;
 
       const exists = carouselImages.some(
-        (img: any) => img.publicId === mainImage
+        (img: ProductImage) => img.publicId === mainImage
       );
       if (!mainImage || !exists) {
         setMainImage(carouselImages[0].publicId);
@@ -143,8 +154,9 @@ const ProductDetails = () => {
       const vImgs = selectedVariant?.images || [];
 
       const variantPick =
-        vImgs.find((img: any) => img.publicId !== blockedProductFirstId)
-          ?.publicId || "";
+        vImgs.find(
+          (img: ProductImage) => img.publicId !== blockedProductFirstId
+        )?.publicId || "";
 
       if (variantPick) {
         setMainImage(variantPick);
@@ -157,7 +169,7 @@ const ProductDetails = () => {
     }
 
     const exists = carouselImages.some(
-      (img: any) => img.publicId === mainImage
+      (img: ProductImage) => img.publicId === mainImage
     );
     if (!mainImage || !exists) {
       setMainImage(carouselImages[0].publicId);
@@ -238,7 +250,7 @@ const ProductDetails = () => {
   const getCurrentIndex = () => {
     if (!carouselImages.length) return 0;
     const idx = carouselImages.findIndex(
-      (img: any) => img.publicId === mainImage
+      (img: ProductImage) => img.publicId === mainImage
     );
     return idx >= 0 ? idx : 0;
   };
@@ -275,7 +287,7 @@ const ProductDetails = () => {
             <div>
               <div className="flex flex-col md:flex-row gap-10">
                 <div className="md:w-1/2">
-                  <div className="mb-4 w-full aspect-[4/3] bg-gray-100 animate-pulse rounded" />
+                  <div className="mb-4 w-full aspect-4/3 bg-gray-100 animate-pulse rounded" />
                   <div className="flex gap-4">
                     {Array.from({ length: 4 }).map((_, i) => (
                       <div
@@ -334,19 +346,21 @@ const ProductDetails = () => {
 
                   {/* Thumbnails */}
                   <div className="flex overflow-x-auto gap-4">
-                    {carouselImages.map((image: any, index: number) => (
-                      <img
-                        key={image.publicId ?? index}
-                        src={cloudinaryImageUrl(image.publicId)}
-                        alt={image.alt || `Thumbnail ${index}`}
-                        className={`w-20 h-20 object-cover cursor-pointer border shrink-0 ${
-                          mainImage === image.publicId
-                            ? "border-black"
-                            : "border-gray-200"
-                        }`}
-                        onClick={() => setMainImage(image.publicId)}
-                      />
-                    ))}
+                    {carouselImages.map(
+                      (image: ProductImage, index: number) => (
+                        <img
+                          key={image.publicId ?? index}
+                          src={cloudinaryImageUrl(image.publicId)}
+                          alt={image.alt || `Thumbnail ${index}`}
+                          className={`w-20 h-20 object-cover cursor-pointer border shrink-0 ${
+                            mainImage === image.publicId
+                              ? "border-black"
+                              : "border-gray-200"
+                          }`}
+                          onClick={() => setMainImage(image.publicId)}
+                        />
+                      )
+                    )}
                   </div>
                 </div>
 
@@ -456,7 +470,7 @@ const ProductDetails = () => {
                 <ProductGrid
                   products={similarProducts}
                   productVariants={similarProductVariants}
-                  loading={loading}
+                  loading={productsLoading}
                   error={error}
                 />
               </div>
