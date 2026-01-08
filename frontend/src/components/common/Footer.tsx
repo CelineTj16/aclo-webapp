@@ -4,7 +4,6 @@ import { FiPhoneCall } from "react-icons/fi";
 import { IoLogoInstagram } from "react-icons/io";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
 import { Link } from "react-router-dom";
-import { CATEGORIES } from "../../constants/categories";
 import { assets, cloudinaryImageUrl } from "../../constants/cloudinary";
 
 const Footer = () => {
