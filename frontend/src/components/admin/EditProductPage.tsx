@@ -16,6 +16,7 @@ import { cloudinaryImageUrl } from "../../constants/cloudinary";
 type ProductVariantData = {
   variantId: string; // required for variant-specific updates
   sku: string;
+  name: string;
   price: number;
   discountPrice?: number;
   countInStock: number;
@@ -36,7 +37,6 @@ type ProductData = {
 };
 const CATEGORIES: ProductCategory[] = [
   "Learning Tower",
-  "Stool",
   "Utensils",
   "Accessories",
 ];
@@ -63,6 +63,7 @@ const EditProductPage = () => {
     useState<ProductVariantData>({
       variantId: "",
       sku: "",
+      name: "",
       price: 0,
       discountPrice: undefined,
       countInStock: 0,
@@ -108,6 +109,7 @@ const EditProductPage = () => {
       setProductVariantData({
         variantId: selectedVariant._id,
         sku: selectedVariant.sku,
+        name: selectedVariant.name,
         price: selectedVariant.price,
         discountPrice: selectedVariant.discountPrice,
         countInStock: selectedVariant.countInStock,
@@ -239,13 +241,9 @@ const EditProductPage = () => {
             Select a variant to edit
           </option>
           {availableVariants.map((v) => {
-            // Create a readable label for the dropdown
-            const labelParts = [v.sku];
-            if (v.color) labelParts.push(v.color);
-            if (v.variant) labelParts.push(v.variant);
             return (
               <option key={v._id} value={v._id}>
-                {labelParts.join(" - ")} (Stock: {v.countInStock})
+                {v.name} (Stock: {v.countInStock})
               </option>
             );
           })}
