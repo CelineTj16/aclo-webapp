@@ -320,7 +320,7 @@ const EditProductPage = () => {
         </div>
         {/* Weight */}
         <div>
-          <label className="block font-semibold mb-1 mt-6">Weight (kg)</label>
+          <label className="block font-semibold mb-1 mt-6">Weight (g)</label>
           <input
             type="number"
             name="weight"
@@ -410,8 +410,8 @@ const EditProductPage = () => {
           </select>
         </div>
         {/* SKU */}
-        <div className="mb-6 mt-6">
-          <label className="block font-semibold mb-2">SKU</label>
+        <div className="mb-6">
+          <label className="block font-semibold mb-2 mt-6">SKU</label>
           <input
             type="text"
             name="sku"
