@@ -1,5 +1,3 @@
-import LearnMore from "../pages/LearnMore";
-
 const CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
 
 export const assets = {
