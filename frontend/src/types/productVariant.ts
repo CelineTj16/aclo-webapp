@@ -4,6 +4,7 @@ export interface ProductVariant {
   _id: string;
   productId: string; // ref Product
   sku: string;
+  adminName: string;
   name: string;
   price: number;
   discountPrice?: number;

@@ -47,6 +47,25 @@ const ProductDetails = () => {
     });
   }, [selectedProduct, searchParams]);
 
+  const hasAllRequiredOptionsSelected = useMemo(() => {
+    if (!selectedProduct?.options) return false;
+    return Object.keys(selectedProduct.options).every((key) => {
+      const v = searchParams.get(key);
+      return v !== null && v !== "";
+    });
+  }, [selectedProduct, searchParams]);
+
+  const displayName = useMemo(() => {
+    if (hasAllRequiredOptionsSelected && selectedVariant?.name) {
+      return selectedVariant.name;
+    }
+    return selectedProduct?.name ?? "";
+  }, [
+    hasAllRequiredOptionsSelected,
+    selectedVariant?.name,
+    selectedProduct?.name,
+  ]);
+
   const displayedImages = useMemo(() => {
     const productImgs = selectedProduct?.images?.length
       ? selectedProduct.images
@@ -317,7 +336,7 @@ const ProductDetails = () => {
                       src={
                         mainImage ? cloudinaryImageUrl(mainImage) : undefined
                       }
-                      alt={selectedProduct.name}
+                      alt={displayName}
                       className="w-full h-auto object-cover"
                     />
 
@@ -367,7 +386,7 @@ const ProductDetails = () => {
                 {/* Right side - Details */}
                 <div className="md:w-1/2 md:ml-10">
                   <h1 className="text-2xl md:text-3xl font-semibold mb-2 text-acloblue">
-                    {selectedProduct.name}
+                    {displayName}
                   </h1>
 
                   {/* Price Display */}
