@@ -165,6 +165,7 @@ const Checkout = () => {
         { duration: 3000 }
       );
       console.error("Error in handleShippingDetails:", error);
+      throw error;
     }
   };
 
@@ -218,7 +219,10 @@ const Checkout = () => {
           isOpen={showShippingDetailsModal}
           onClose={() => {
             setShowShippingDetailsModal(false);
-            if (!user?.shippingAddresses || user.shippingAddresses.length === 0) {
+            const hasNoSavedAddresses = !user?.shippingAddresses || user.shippingAddresses.length === 0;
+            const hasNoShippingDetails = !shippingDetails.postalCode;
+            
+            if (hasNoSavedAddresses && hasNoShippingDetails) {
               navigate("/");
             }
           }}

@@ -8,7 +8,7 @@ import { addShippingAddress, updateShippingAddress } from "../../redux/slices/au
 interface ShippingDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (details: ShippingDetails) => void;
+  onSubmit: (details: ShippingDetails) => Promise<void>;
   userEmail?: string;
   isCalculating: boolean;
   initialMode?: "selection" | "form"; // to control initial view
@@ -64,15 +64,28 @@ const ShippingDetailsModal = ({
     }
   }, [user, initialMode]);
 
-  const handleSelectAddress = (address: ShippingAddress) => {
-    onSubmit({
-      name: address.name,
-      address: address.address,
-      city: address.city,
-      postalCode: address.postalCode,
-      phone: address.phone,
-    });
-    onClose();
+  const handleSelectAddress = async (address: ShippingAddress) => {
+    try {
+      await onSubmit({
+        name: address.name,
+        address: address.address,
+        city: address.city,
+        postalCode: address.postalCode,
+        phone: address.phone,
+      });
+    } catch (error) {
+      // If shipping calculation fails - there's issue with address
+      // switch to form view to show the address
+      console.error("Error selecting address:", error);
+      setShippingDetails({
+        name: address.name,
+        address: address.address,
+        city: address.city,
+        postalCode: address.postalCode,
+        phone: address.phone,
+      });
+      setMode("form");
+    }
   };
 
   const handleEditAddress = (address: ShippingAddress) => {
@@ -104,31 +117,37 @@ const ShippingDetailsModal = ({
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
-    if (user) {
-      if (isNewAddress && saveAddress) {
-        // Add new address
-        const resultAction = await dispatch(addShippingAddress(shippingDetails));
-        if (addShippingAddress.fulfilled.match(resultAction)) {
-          // Get the newly added address
-          const updatedUser = resultAction.payload;
-          if (updatedUser.shippingAddresses && updatedUser.shippingAddresses.length > 0) {
-            const newAddress = updatedUser.shippingAddresses[updatedUser.shippingAddresses.length - 1];
-            setSelectedAddressInView(newAddress._id);
+    try {
+      await onSubmit(shippingDetails);
+      
+      // Only save valid addresses (ie shipping calculation passed)
+      if (user) {
+        if (isNewAddress && saveAddress) {
+          const resultAction = await dispatch(addShippingAddress(shippingDetails));
+          
+          if (addShippingAddress.fulfilled.match(resultAction)) {
+            const updatedUser = resultAction.payload;
+            
+            if (updatedUser.shippingAddresses && updatedUser.shippingAddresses.length > 0) {
+              const newAddress = updatedUser.shippingAddresses[updatedUser.shippingAddresses.length - 1];
+              setSelectedAddressInView(newAddress._id);
+            }
+          }
+        } else if (!isNewAddress && editingAddressId) {
+          // Always update existing address when editing
+          const resultAction = await dispatch(updateShippingAddress({
+            addressId: editingAddressId,
+            updates: shippingDetails,
+          }));
+          if (updateShippingAddress.fulfilled.match(resultAction)) {
+            setSelectedAddressInView(editingAddressId);
           }
         }
-      } else if (!isNewAddress && editingAddressId) {
-        // Always update existing address when editing
-        const resultAction = await dispatch(updateShippingAddress({
-          addressId: editingAddressId,
-          updates: shippingDetails,
-        }));
-        if (updateShippingAddress.fulfilled.match(resultAction)) {
-          setSelectedAddressInView(editingAddressId);
-        }
       }
+      
+    } catch (error) {
+      console.error("Error on submitting shipping details:", error);
     }
-    
-    onSubmit(shippingDetails);
   };
 
   if (!isOpen) return null;
