@@ -66,10 +66,11 @@ const OrderConfirmation = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white">
-      <h1 className="text-4xl font-bold text-center text-emerald-700 mb-8">
+      <h1 className="text-3xl sm:text-4xl font-semibold text-center text-acloblue mb-4 uppercase tracking-tight">
         Thank You for Your Order!
       </h1>
-      <div className="p-6 rounded-lg border">
+      <div className="h-[2px] w-16 bg-acloblue/30 rounded-full mx-auto mb-8" />
+      <div className="p-6 rounded-2xl border border-gray-100 bg-white shadow-sm">
         <div className="flex justify-between mb-10">
           {/* Order Id and Date */}
           <div>
@@ -83,7 +84,7 @@ const OrderConfirmation = () => {
           </div>
           {/* Estimated Delivery */}
           <div>
-            <p className="text-emerald-700 text-sm">
+            <p className="text-emerald-700 text-sm inline-flex items-center px-3 py-1 rounded-full bg-emerald-50">
               Estimated Delivery:{" "}
               {calculateEstimatedDelivery(orderDetails.createdAt)}
             </p>
@@ -92,7 +93,10 @@ const OrderConfirmation = () => {
         {/* Ordered Items */}
         <div className="mb-10">
           {orderDetails.orderItems.map((item) => (
-            <div key={item.productId} className="flex items-center mb-4">
+            <div
+              key={item.productId}
+              className="flex items-center py-4 border-b border-gray-100 last:border-b-0"
+            >
               <img
                 src={cloudinaryImageUrl(item.image)}
                 alt={item.name}
@@ -114,13 +118,16 @@ const OrderConfirmation = () => {
                 )}
               </div>
               <div className="ml-auto text-right">
-                <p className="text-md">IDR {item.price.toLocaleString()}</p>
+                <p className="text-md font-semibold text-acloblue">
+                  IDR {Number(item.price).toLocaleString("en-US")}
+                </p>
+
                 <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
               </div>
             </div>
           ))}
         </div>
-        <div className="mb-6">
+        <div className="mb-6 rounded-xl bg-acloblue/5 border border-acloblue/10 p-4 text-gray-700">
           Your order has been placed and is pending payment verification. We'll
           notify you once it's approved and when your tracking number is
           available.
@@ -128,11 +135,15 @@ const OrderConfirmation = () => {
         {/* Payment and Delivery Info */}
         <div className="grid grid-cols-2 gap-8">
           <div>
-            <h4 className="text-lg font-semibold mb-2">Payment</h4>
+            <h4 className="text-lg font-semibold mb-2 text-acloblue">
+              Payment
+            </h4>
             <p className="text-gray-600">Bank Transfer</p>
           </div>
           <div>
-            <h4 className="text-lg font-semibold mb-2">Delivery</h4>
+            <h4 className="text-lg font-semibold mb-2 text-acloblue">
+              Delivery
+            </h4>
             <p className="text-gray-600">
               {orderDetails.shippingDetails.address}
             </p>
