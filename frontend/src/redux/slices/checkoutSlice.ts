@@ -147,6 +147,7 @@ const checkoutSlice = createSlice({
       state.selectedShipping = null;
       state.shippingError = null;
       state.shippingDetails = null;
+      localStorage.removeItem("shippingOptions");
       localStorage.removeItem("selectedShipping");
       localStorage.removeItem("shippingDetails");
     },
