@@ -4,57 +4,54 @@ import jneLogo from "../../assets/jne-logo.png";
 import grabLogo from "../../assets/grab-logo.png";
 
 interface ShippingOptionsModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    shippingOptions: ShippingOption[];
-    selectedShipping: ShippingOption | null;
-    onSelectShipping: (option: ShippingOption) => void;
+  isOpen: boolean;
+  onClose: () => void;
+  shippingOptions: ShippingOption[];
+  selectedShipping: ShippingOption | null;
+  onSelectShipping: (option: ShippingOption) => void;
 }
 
 const ShippingOptionsModal = ({
-    isOpen,
-    onClose,
-    shippingOptions,
-    selectedShipping,
-    onSelectShipping,
+  isOpen,
+  onClose,
+  shippingOptions,
+  selectedShipping,
+  onSelectShipping,
 }: ShippingOptionsModalProps) => {
-    if (!isOpen) return null;
+  if (!isOpen) return null;
 
-    const handleSelect = (option: ShippingOption) => {
-        onSelectShipping(option);
-        onClose();
-    };
+  const handleSelect = (option: ShippingOption) => {
+    onSelectShipping(option);
+    onClose();
+  };
 
-    return (
-        <div
-        className="fixed inset-0 z-50 flex items-center justify-center px-6"
-        role="dialog"
-        aria-modal="true"
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center px-6"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="relative w-full max-w-2xl rounded-xl bg-white p-6 shadow-lg border max-h-[80vh] overflow-y-auto">
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close dialog"
+          className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition"
         >
-        <div
-            className="absolute inset-0 bg-black/40"
-            onClick={onClose}
-        />
-        <div className="relative w-full max-w-2xl rounded-xl bg-white p-6 shadow-lg border max-h-[80vh] overflow-y-auto">
-            <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close dialog"
-            className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition"
-            >
-            <IoMdClose className="h-6 w-6 hover:text-gray-600 cursor-pointer" />
-            </button>
+          <IoMdClose className="h-6 w-6 hover:text-gray-600 cursor-pointer" />
+        </button>
 
-            <h3 className="text-xl font-semibold text-gray-900 mb-4 tracking-tight">
-            Select Shipping Method
-            </h3>
+        <h3 className="text-xl font-semibold mb-4 tracking-tight text-acloblue">
+          Select Shipping Method
+        </h3>
 
-            <p className="text-sm text-gray-600 mb-6">
-            Choose your preferred shipping courier and service
-            </p>
+        <p className="text-sm text-gray-600 mb-6">
+          Choose your preferred shipping courier and service
+        </p>
 
-            <div className="space-y-3">
-            {shippingOptions.map((option, index) => (
+        <div className="space-y-3">
+          {shippingOptions.map((option, index) => (
                 <div
                 key={index}
                 className={`border rounded-lg p-4 cursor-pointer transition-all ${
@@ -97,7 +94,7 @@ const ShippingOptionsModal = ({
                     </p>
                     <div className="flex items-center gap-4 text-sm">
                         <span className="text-gray-700">
-                        <strong>Duration:</strong> {option.duration}
+                        {option.duration}
                         </span>
                     </div>
                     </div>
@@ -110,17 +107,17 @@ const ShippingOptionsModal = ({
                     </div>
                 </div>
                 </div>
-            ))}
-            </div>
+          ))}
+        </div>
 
-            {shippingOptions.length === 0 && (
-            <p className="text-center text-gray-500 py-8">
-                No shipping options available
-            </p>
-            )}
-        </div>
-        </div>
-    );
+        {shippingOptions.length === 0 && (
+          <p className="text-center text-gray-500 py-8">
+            No shipping options available
+          </p>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default ShippingOptionsModal;

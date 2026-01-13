@@ -144,7 +144,7 @@ const Payment = () => {
         <div className="text-xl mb-2">
           Your total purchase cost is{" "}
           <span className="font-semibold">
-            IDR {(checkout?.totalPrice ?? 0).toLocaleString()}
+            IDR {(checkout?.totalPrice ?? 0).toLocaleString("id-ID")}
           </span>
           .
         </div>
