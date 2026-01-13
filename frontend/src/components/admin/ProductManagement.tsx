@@ -20,24 +20,16 @@ const ProductManagement = () => {
   const [priceModalOpen, setPriceModalOpen] = useState(false);
   const [activeVariantId, setActiveVariantId] = useState<string | null>(null);
   const [activeProductName, setActiveProductName] = useState("");
-  const [activePrice, setActivePrice] = useState<number | undefined>(undefined);
-  const [activeDiscount, setActiveDiscount] = useState<
-    number | null | undefined
-  >(undefined);
   const [activeVariants, setActiveVariants] = useState<any[]>([]);
 
   const openQuickPrice = (
     variantId: string,
     productName: string,
-    variants: any[],
-    price?: number,
-    discountPrice?: number | null
+    variants: any[]
   ) => {
     setActiveVariantId(variantId);
     setActiveProductName(productName);
     setActiveVariants(variants);
-    setActivePrice(price);
-    setActiveDiscount(discountPrice ?? null);
     setPriceModalOpen(true);
   };
 
@@ -143,9 +135,7 @@ const ProductManagement = () => {
                           openQuickPrice(
                             defaultVariant._id,
                             product.name,
-                            allVariants,
-                            defaultVariant.price,
-                            defaultVariant.discountPrice ?? null
+                            allVariants
                           );
                         }}
                         className="bg-acloblue text-white px-2 py-1 rounded mr-2 hover:opacity-90"

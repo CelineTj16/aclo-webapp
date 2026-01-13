@@ -131,9 +131,6 @@ const EditProductPage = () => {
     }
   };
 
-  const displayPrice =
-    productVariantData.discountPrice ?? productVariantData.price;
-
   // Generic Product Handler
   const handleProductChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
