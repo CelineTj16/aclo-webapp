@@ -8,6 +8,7 @@ import {
 } from "../../redux/slices/productsSlice";
 import { cloudinaryImageUrl } from "../../constants/cloudinary";
 import ChangePriceModal from "./ChangePriceModal";
+import type { ProductVariant } from "../../types/productVariant";
 
 const ProductManagement = () => {
   const dispatch = useAppDispatch();
@@ -20,7 +21,7 @@ const ProductManagement = () => {
   const [priceModalOpen, setPriceModalOpen] = useState(false);
   const [activeVariantId, setActiveVariantId] = useState<string | null>(null);
   const [activeProductName, setActiveProductName] = useState("");
-  const [activeVariants, setActiveVariants] = useState<any[]>([]);
+  const [activeVariants, setActiveVariants] = useState<ProductVariant[]>([]);
 
   const openChangePrice = (
     variantId: string,
