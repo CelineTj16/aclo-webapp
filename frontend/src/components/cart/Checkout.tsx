@@ -36,41 +36,47 @@ const Checkout = () => {
   const lastCalculatedRef = useRef<{
     postalCode: string;
     cartId: string;
+    totalPrice: number;
   } | null>(null);
 
   // Only calculate shipping if postal code or cart changed
-  const shouldCalculateShipping = (postalCode: string, currentCartId: string): boolean => {
+  const shouldCalculateShipping = (postalCode: string, currentCartId: string, totalPrice: number): boolean => {
     if (!lastCalculatedRef.current) return true;
     
     return (
       lastCalculatedRef.current.postalCode !== postalCode ||
-      lastCalculatedRef.current.cartId !== currentCartId
+      lastCalculatedRef.current.cartId !== currentCartId ||
+      lastCalculatedRef.current.totalPrice !== totalPrice
     );
   };
 
   // Auto-fill shipping details + calculate shipping if user has saved addresses
   useEffect(() => {
-    if (shippingDetails && cart?.products) {
+    if (!cart?.products || cart.products.length === 0) {
       return;
     }
 
-    if (user?.shippingAddresses && user.shippingAddresses.length > 0 && cart?.products) {
+    let detailsToUse: ShippingDetails | null = null;
+    
+    if (shippingDetails?.postalCode) {
+      detailsToUse = shippingDetails;
+    } else if (user?.shippingAddresses && user.shippingAddresses.length > 0) {
       const firstAddress = user.shippingAddresses[0];
-      
-      const details: ShippingDetails = {
+      detailsToUse = {
         name: firstAddress.name,
         address: firstAddress.address,
         city: firstAddress.city,
         postalCode: firstAddress.postalCode,
         phone: firstAddress.phone,
       };
-      
-      dispatch(setShippingDetails(details));
-      
-      if (shouldCalculateShipping(firstAddress.postalCode, cart._id)) {
+      dispatch(setShippingDetails(detailsToUse));
+    }
+
+    if (detailsToUse) {
+      if (shouldCalculateShipping(detailsToUse.postalCode, cart._id, cart.totalPrice)) {
         dispatch(
           calculateShippingCost({
-            destinationPostalCode: firstAddress.postalCode,
+            destinationPostalCode: detailsToUse.postalCode,
             cartItems: cart.products.map((p) => ({
               productId: p.productId,
               price: p.price,
@@ -80,8 +86,9 @@ const Checkout = () => {
         ).unwrap()
           .then(() => {
             lastCalculatedRef.current = {
-              postalCode: firstAddress.postalCode,
+              postalCode: detailsToUse!.postalCode,
               cartId: cart._id,
+              totalPrice: cart.totalPrice,
             };
           })
           .catch((error: any) => {
@@ -93,11 +100,11 @@ const Checkout = () => {
           });
       }
     } else {
-      // No saved addresses, show modal to add new address
+      // No saved addresses and no existing details, show modal to add new address
       setModalMode("form");
       setShowShippingDetailsModal(true);
     }
-  }, [user, cart?.products, shippingDetails, dispatch]);
+  }, [user, cart?.products, cart?._id, cart?.totalPrice, shippingDetails, dispatch]);
 
   useEffect(() => {
     if (!cartId) {
@@ -130,7 +137,8 @@ const Checkout = () => {
       return;
     }
 
-    if (!shouldCalculateShipping(shippingDetails.postalCode, cart._id)) {
+    if (!shouldCalculateShipping(shippingDetails.postalCode, cart._id, cart.totalPrice)) {
+      dispatch(setShippingDetails(shippingDetails));
       setShowShippingDetailsModal(false);
       return;
     }
@@ -150,6 +158,7 @@ const Checkout = () => {
       lastCalculatedRef.current = {
         postalCode: shippingDetails.postalCode,
         cartId: cart._id,
+        totalPrice: cart.totalPrice,
       };
       
       dispatch(setShippingDetails(shippingDetails));

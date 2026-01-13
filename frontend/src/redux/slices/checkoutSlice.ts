@@ -195,10 +195,15 @@ const checkoutSlice = createSlice({
           state.shippingLoading = false;
           state.shippingOptions = action.payload.options;
           localStorage.setItem("shippingOptions", JSON.stringify(action.payload.options));
-          // auto-select the first shipping option
-          if (action.payload.options.length > 0) {
-            state.selectedShipping = action.payload.options[0];
-            localStorage.setItem("selectedShipping", JSON.stringify(action.payload.options[0]));
+          
+          const prev = state.selectedShipping;
+          state.selectedShipping = (prev && action.payload.options.find(
+            opt => opt.courierCode === prev.courierCode && 
+                   opt.courierServiceName === prev.courierServiceName
+          )) || action.payload.options[0] || null;
+          
+          if (state.selectedShipping) {
+            localStorage.setItem("selectedShipping", JSON.stringify(state.selectedShipping));
           }
         }
       )
