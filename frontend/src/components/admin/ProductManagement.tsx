@@ -26,7 +26,7 @@ const ProductManagement = () => {
   const openChangePrice = (
     variantId: string,
     productName: string,
-    variants: any[]
+    variants: ProductVariant[]
   ) => {
     setActiveVariantId(variantId);
     setActiveProductName(productName);
